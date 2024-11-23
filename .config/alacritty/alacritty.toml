@@ -7,3 +7,10 @@ dynamic_padding = false
 [window.padding]
 x = 22
 y = 18
+
+[font]
+size = 15.0
+normal.family = "Fira Code Retina"
+bold.family = "Fira Code Retina"
+italic.family = "Fira Code Retina"
+bold_italic.family = "Fira Code Retina"

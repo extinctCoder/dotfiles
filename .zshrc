@@ -82,7 +82,16 @@ alias ls='ls --color'
 alias vim='ivim $(fzf -m --preview="bat --color=always {}")'
 alias nano='nano $(fzf -m --preview="bat --color=always {}")'
 
+# for minikube only
+# alias kubectl="minikube kubectl --"
+
+# extra environment variables
+export PATH=$PATH:/home/extinctcoder/.local/bin
+
+# run fastfetch
+fastfetch
 
 
 # packages required
 # fzf git zsh alacritty
+
