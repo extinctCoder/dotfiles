@@ -3,11 +3,13 @@
   "logo": {
     "type": "small",
     "padding": {
+      "top": 1,
       "left": 3
     },
     "position": "left"
   },
   "modules": [
+    "break",
     {
       "type": "host",
       "key": " PC",
@@ -20,7 +22,12 @@
     },
     {
       "type": "disk",
-      "key": "└ └",
+      "key": "│ ├",
+      "keyColor": "green"
+    },
+    {
+      "type": "battery",
+      "key": "└ └",
       "keyColor": "green"
     },
     {
@@ -30,18 +37,13 @@
     },
     {
       "type": "packages",
-      "key": "│ ├",
-      "keyColor": "yellow"
-    },
-    {
-      "type": "battery",
-      "key": "└ └",
+      "key": "└ └",
       "keyColor": "yellow"
     },
     // "break",
     {
       "type": "colors",
-      "paddingLeft": 2,
+      "paddingLeft": 4,
       "symbol": "circle"
     }
   ]
