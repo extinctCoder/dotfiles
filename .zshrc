@@ -32,10 +32,14 @@ eval "$(pyenv init -)"
 eval "$(starship init zsh)"
 
 # enable plugins
-zinit light zsh-users/zsh-syntax-highlighting
+# zinit light zsh-users/zsh-syntax-highlighting
+zinit light zdharma-continuum/fast-syntax-highlighting # it is suppose to be the replacement for zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 zinit light Aloxaf/fzf-tab
+
+# coloured man pages
+zinit light ael-code/zsh-colored-man-pages
 
 # additional plugins
 zinit snippet OMZP::git
@@ -80,7 +84,9 @@ zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' menu no
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
-
+    # for docker plugin
+zstyle ':completion:*:*:docker:*' option-stacking yes
+zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
 # zsh essentials
 HISTSIZE=100000
@@ -114,9 +120,9 @@ alias nano='nano $(fzf -m --preview="bat --color=always {}")'
 # export PATH=$PATH:/home/extinctcoder/.local/bin
 
 # run fastfetch
-# fastfetch
+fastfetch
 
-tmux
+# tmux
 # packages required
 # fzf git zsh alacritty
 
