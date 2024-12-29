@@ -2,16 +2,17 @@
 live_config_reload = true
 
 [window]
-opacity = 0.95
+opacity = 0.90
 dynamic_padding = false
+# decorations = "None"
 
 [window.padding]
 x = 22
 y = 18
 
 [font]
-size = 15.0
-normal.family = "Fira Code Retina"
-bold.family = "Fira Code Retina"
-italic.family = "Fira Code Retina"
-bold_italic.family = "Fira Code Retina"
+size = 14.0
+normal.family = "MonoLisa Nerd Font Mono"
+bold.family = "MonoLisa Nerd Font Mono"
+italic.family = "MonoLisa Nerd Font Mono"
+bold_italic.family = "MonoLisa Nerd Font Mono"
