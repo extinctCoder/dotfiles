@@ -41,6 +41,9 @@ zinit light Aloxaf/fzf-tab
 # coloured man pages
 zinit light ael-code/zsh-colored-man-pages
 
+# for poetry configuration
+zinit light darvid/zsh-poetry
+
 # additional plugins
 zinit snippet OMZP::git
 zinit snippet OMZP::ssh
@@ -118,6 +121,10 @@ alias nano='nano $(fzf -m --preview="bat --color=always {}")'
 
 # extra environment variables for linux
 # export PATH=$PATH:/home/extinctcoder/.local/bin
+
+# setup for poetry
+ZSH_POETRY_AUTO_ACTIVATE=true
+export ZSH_POETRY_AUTO_ACTIVATE
 
 # run fastfetch
 fastfetch
