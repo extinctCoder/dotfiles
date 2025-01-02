@@ -1,11 +1,19 @@
-require("not_ide.plugins-setup")
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+    vim.fn.system({
+        "git",
+        "clone",
+        "--filter=blob:none",
+        "https://github.com/folke/lazy.nvim.git",
+        "--branch=stable",
+        lazypath,
+    })
+end
+vim.opt.rtp:prepend(lazypath)
 
-require("not_ide.core.options")
-require("not_ide.core.keymaps")
-require("not_ide.core.colorscheme")
+require("options")
+require("lazy").setup("plugins")
 
 
--- Plugins CONFIG
 
-require("not_ide.plugins.comment")
-require("not_ide.plugins.nvim-tree")
+-- require("lazy").setup("plugins")
