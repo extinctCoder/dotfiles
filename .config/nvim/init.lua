@@ -13,8 +13,23 @@ vim.opt.rtp:prepend(lazypath)
 
 require("options")
 require("keymaps")
-require("lazy").setup("plugins")
-
-
-
--- require("lazy").setup("plugins")
+require("lazy").setup("plugins", {
+    ui = {
+        icons = {
+            cmd = '⌘',
+            config = '🛠',
+            favorite = '❤️',
+            event = '📅',
+            ft = '📂',
+            init = '⚙',
+            keys = '🗝',
+            plugin = '🔌',
+            runtime = '💻',
+            require = '🌙',
+            source = '📄',
+            start = '🚀',
+            task = '📌',
+            lazy = '💤 ',
+        },
+    },
+})

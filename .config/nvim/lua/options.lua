@@ -29,7 +29,7 @@ opt.termguicolors = true
 -- opt.signcolumn = "yes"  -- show sign column so that text doesn't shift
 
 -- backspace
--- opt.backspace = "indent,eol,start" -- allow backspace on indent, end of line or insert mode start position
+opt.backspace = "indent,eol,start" -- allow backspace on indent, end of line or insert mode start position
 
 -- clipboard
 opt.clipboard:append("unnamedplus") -- use system clipboard as default register
