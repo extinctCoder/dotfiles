@@ -1,0 +1,77 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "icon_theme": "Material Icon Theme",
+  "ssh_connections": [
+    {
+      "host": "192.168.1.60",
+      "username": "extinctcoder",
+      "projects": [
+        {
+          "paths": [
+            "~/ros2_ws/src"
+          ]
+        }
+      ],
+      "nickname": "lattepanda"
+    }
+  ],
+  "agent": {
+    "default_profile": "ask",
+    "default_model": {
+      "provider": "copilot_chat",
+      "model": "claude-sonnet-4"
+    }
+  },
+  "ui_font_size": 14,
+  "buffer_font_size": 15.0,
+  "theme": {
+    "mode": "system",
+    "light": "Catppuccin Latte",
+    "dark": "Catppuccin Mocha"
+  },
+  // Font customization settings
+  "ui_font_family": "MonoLisa Nerd Font Mono",
+  // Basic editor customizarion
+  "relative_line_numbers": true,
+  "minimap": {
+    "show": "always",
+    "current_line_highlight": "all"
+  },
+  "scrollbar": {
+    "show": "never"
+  },
+  "centered_layout": {
+    "left_padding": 0.01,
+    "right_padding": 0.01
+  },
+  "format_on_save": "on",
+  "formatter": "language_server",
+  // Language specific customizations
+  "languages": {
+    "Python": {
+      "language_servers": [
+        "ruff",
+        "pyright",
+        "codebook"
+      ],
+      "code_actions_on_format": {
+        "source.fixAll.ruff": true,
+        "source.organizeImports.ruff": true
+      },
+      "formatter": [
+        {
+          "language_server": {
+            "name": "ruff"
+          }
+        }
+      ]
+    }
+  }
+}

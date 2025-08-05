@@ -12,7 +12,35 @@ y = 18
 
 [font]
 size = 14.0
-normal.family = "MonoLisa Nerd Font Mono"
-bold.family = "MonoLisa Nerd Font Mono"
-italic.family = "MonoLisa Nerd Font Mono"
-bold_italic.family = "MonoLisa Nerd Font Mono"
+normal.family = "FiraCode Nerd Font Mono"
+bold.family = "FiraCode Nerd Font Mono"
+italic.family = "FiraCode Nerd Font Mono"
+bold_italic.family = "FiraCode Nerd Font Mono"
+# normal.family = "MonoLisa Nerd Font Mono"
+# bold.family = "MonoLisa Nerd Font Mono"
+# italic.family = "MonoLisa Nerd Font Mono"
+# bold_italic.family = "MonoLisa Nerd Font Mono"
+
+
+# [terminal.shell]
+# program = "tmux"
+
+# [terminal.shell]
+# program = "zsh"
+# args = [
+#     "-c",
+#     '[[ -z "$TMUX" ]] && exec tmux new-session -A -s main || exec zsh',
+# ]
+
+# [terminal.shell]
+# program = "zsh"
+# args = [
+#     "-c",
+#     "[[ -z \\\"$TMUX\\\" ]] && exec tmux new-session -A -s main || exec zsh",
+# ]
+# [terminal.shell]
+# program = "zsh"
+# args = [
+#     "-c",
+#     'if [ -z "$TMUX" ]; then exec tmux new-session -A -s main; else exec zsh; fi',
+# ]

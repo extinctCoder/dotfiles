@@ -1,0 +1,130 @@
+# FOR MACOS specific setup
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
+    # load homebrew to mac systems
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+
+    # variable declaration for zlib and openssl
+    LDFLAGS="-L$(brew --prefix openssl)/lib -L$(brew --prefix zlib)/lib"
+    CPPFLAGS="-I$(brew --prefix openssl)/include -I$(brew --prefix zlib)/include"
+    PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig:$(brew --prefix zlib)/lib/pkgconfig"
+    export LDFLAGS CPPFLAGS PKG_CONFIG_PATH
+
+    # load zinit to mac systems
+    if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
+        command mkdir -p "$HOME/.local/share/zinit" && command chmod g-rwX "$HOME/.local/share/zinit"
+        command git clone https://github.com/zdharma-continuum/zinit "$HOME/.local/share/zinit/zinit.git"
+    fi
+    source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
+fi
+
+# pyENV initialization
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
+
+# enable plugins
+zinit light zdharma-continuum/fast-syntax-highlighting
+zinit light zsh-users/zsh-completions
+zinit light zsh-users/zsh-autosuggestions
+zinit light Aloxaf/fzf-tab
+
+# coloured man pages
+zinit light ael-code/zsh-colored-man-pages
+
+# poetry configuration
+zinit light darvid/zsh-poetry
+
+# additional plugins
+zinit snippet OMZP::git
+zinit snippet OMZP::ssh
+zinit snippet OMZP::dnf
+zinit snippet OMZP::sudo
+zinit snippet OMZP::systemd
+zinit snippet OMZP::docker
+zinit snippet OMZP::docker-compose
+zinit snippet OMZP::rust
+zinit snippet OMZP::pip
+zinit snippet OMZP::pipenv
+zinit snippet OMZP::postgres
+zinit snippet OMZP::web-search
+zinit snippet OMZP::command-not-found
+
+# setup completion system
+fpath=(~/.docker/completions "${fpath[@]}")
+autoload -Uz compinit
+compinit
+
+# load autocompletion
+zinit cdreplay -q
+
+# auto completion preference (after compinit and plugin loading)
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' menu select
+
+# fzf-tab configuration
+enable-fzf-tab
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+zstyle ':fzf-tab:complete:git-(add|diff|restore):*' fzf-preview 'git diff $word | head -200'
+zstyle ':fzf-tab:complete:*:*' fzf-preview 'less ${(Q)realpath}'
+zstyle ':fzf-tab:*' fzf-flags --height=80% --layout=reverse
+
+# docker completion configuration
+zstyle ':completion:*:*:docker:*' option-stacking yes
+zstyle ':completion:*:*:docker-*:*' option-stacking yes
+
+# keybinding to emacs mode
+bindkey -e
+bindkey '^p' history-search-backward
+bindkey '^n' history-search-forward
+bindkey '^[w' kill-region
+
+# enable starship
+eval "$(starship init zsh)"
+
+# enable fzf
+eval "$(fzf --zsh)"
+eval "$(zoxide init --cmd cd zsh)"
+
+# zsh essentials
+HISTSIZE=100000
+HISTFILE=~/.zsh_history
+SAVEHIST=$HISTSIZE
+HISTDUP=erase
+setopt appendhistory
+setopt sharehistory
+setopt hist_ignore_space
+setopt hist_ignore_all_dups
+setopt hist_save_no_dups
+setopt hist_ignore_dups
+setopt hist_find_no_dups
+export SAVEHIST HISTDUP
+
+# custom aliases
+alias c='clear'
+alias ls='ls --color'
+alias vim='ivim $(fzf -m --preview="bat --color=always {}")'
+alias nano='nano $(fzf -m --preview="bat --color=always {}")'
+
+# setup for poetry
+ZSH_POETRY_AUTO_ACTIVATE=true
+export ZSH_POETRY_AUTO_ACTIVATE
+
+# run fastfetch
+fastfetch
+
+# LLVM configuration
+export LLVM_CONFIG=/opt/homebrew/opt/llvm/bin/llvm-config
+export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+
+export PATH="$PATH:$HOME/.local/bin"
+
+
+
+# Start tmux if not already inside tmux or SSH
+if [[ -z "$TMUX" ]] && [[ -z "$SSH_TTY" ]] && command -v tmux >/dev/null 2>&1; then
+  exec tmux new-session -A -s main
+fi

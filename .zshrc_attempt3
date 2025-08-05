@@ -1,0 +1,186 @@
+#!/bin/zsh
+# =============================================================================
+# ZSH CONFIGURATION
+# =============================================================================
+# Author: extinctCoder
+# Last Updated: August 4, 2025
+#
+# This configuration is organized into sections for easy management
+# =============================================================================
+
+# =============================================================================
+# ENVIRONMENT VARIABLES
+# =============================================================================
+# Set default editor
+export EDITOR="nvim"
+export VISUAL="nvim"
+
+# Path configuration
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+# XDG Base Directory Specification
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
+
+# Language and locale
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
+
+# =============================================================================
+# ZSH OPTIONS & SETTINGS
+# =============================================================================
+# History settings
+HISTFILE=~/.zsh_history
+HISTSIZE=50000
+SAVEHIST=50000
+setopt HIST_IGNORE_DUPS          # Don't record duplicate commands
+setopt HIST_FIND_NO_DUPS         # Don't show duplicates when searching
+setopt HIST_IGNORE_ALL_DUPS      # Remove older duplicate entries from history
+setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks from history
+setopt HIST_IGNORE_SPACE         # Don't record commands starting with space
+setopt HIST_SAVE_NO_DUPS         # Don't save duplicates to history file
+setopt SHARE_HISTORY             # Share history between sessions
+setopt APPEND_HISTORY            # Append to history file
+setopt INC_APPEND_HISTORY        # Add commands to history immediately
+setopt EXTENDED_HISTORY          # Record timestamp in history
+
+# Basic zsh behavior
+setopt AUTO_CD                   # Change directory without typing 'cd'
+setopt EXTENDED_GLOB             # Enable extended globbing patterns
+setopt GLOB_DOTS                 # Include dotfiles in glob patterns
+setopt INTERACTIVE_COMMENTS      # Allow comments in interactive mode
+setopt NO_BEEP                   # Disable terminal beep
+
+# =============================================================================
+# COMPLETION
+# =============================================================================
+# Basic completion settings
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' # Case insensitive completion
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}" # Colored completion
+zstyle ':completion:*:descriptions' format '[%d]'
+
+# =============================================================================
+# ALIASES
+# =============================================================================
+
+
+# =============================================================================
+# FUNCTIONS
+# =============================================================================
+# Custom cd with fzf for directory selection
+fzf_cd() {
+    local dir
+    dir=$(find . -type d -not -path '*/.*' 2>/dev/null | fzf --preview 'eza -1 --color=always {} 2>/dev/null || ls -1 {}' --height=70% --layout=reverse --border)
+    if [[ -n $dir ]]; then
+        cd "$dir"
+    fi
+    zle reset-prompt
+}
+
+# Create a zle widget from the function
+zle -N fzf_cd
+
+# Bind Ctrl+G to fzf_cd for quick directory jumping
+bindkey '^G' fzf_cd
+
+# =============================================================================
+# PROMPT CONFIGURATION
+# =============================================================================
+
+
+# =============================================================================
+# PLUGINS & FRAMEWORKS
+# =============================================================================
+# Zinit plugin manager
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+
+# Download Zinit, if it's not there yet
+if [ ! -d "$ZINIT_HOME" ]; then
+   mkdir -p "$(dirname $ZINIT_HOME)"
+   git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+fi
+
+# Source/Load zinit
+source "${ZINIT_HOME}/zinit.zsh"
+
+# Essential plugins
+zinit light zsh-users/zsh-syntax-highlighting
+zinit light zsh-users/zsh-completions
+zinit light zsh-users/zsh-autosuggestions
+
+# fzf integration
+zinit light Aloxaf/fzf-tab
+
+# zoxide integration (better cd)
+zinit light ajeetdsouza/zoxide
+
+# Load completions
+autoload -Uz compinit && compinit
+
+# Replay cached completions
+zinit cdreplay -q
+
+# Configure fzf-tab (after plugins are loaded)
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath 2>/dev/null || ls -1 $realpath'
+zstyle ':fzf-tab:complete:cd:*' fzf-flags --height=70% --layout=reverse --border
+zstyle ':fzf-tab:complete:cd:*' fzf-command 'fzf'
+zstyle ':fzf-tab:*' switch-group '<' '>'
+zstyle ':fzf-tab:*' single-group color header
+zstyle ':fzf-tab:*' prefix ''
+
+# Make cd tab completion show all directories like Ctrl+G
+zstyle ':completion:*:cd:*' tag-order local-directories
+zstyle ':completion:*:cd:*' group-name ''
+zstyle ':completion:*:cd:*' ignore-parents parent pwd
+zstyle ':completion:*:cd:*' list-dirs-first true
+zstyle ':completion:*:cd:*' special-dirs false
+zstyle ':completion:*:cd:*' squeeze-slashes true
+
+# Custom completion function for cd to show all directories
+_cd_all_dirs() {
+    local -a dirs
+    dirs=(${(f)"$(find . -type d -not -path '*/.*' 2>/dev/null)"})
+    _describe 'directories' dirs
+}
+
+# Override cd completion to use our custom function
+compdef _cd_all_dirs cd
+
+# =============================================================================
+# EXTERNAL TOOLS & INTEGRATIONS
+# =============================================================================
+# fzf - Fuzzy finder
+if command -v fzf >/dev/null 2>&1; then
+    # fzf configuration
+    export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --inline-info"
+    export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow --exclude .git"
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_ALT_C_COMMAND="fd --type d --hidden --follow --exclude .git"
+    
+    # Source fzf key bindings and completion
+    if [[ -f ~/.fzf.zsh ]]; then
+        source ~/.fzf.zsh
+    elif [[ -f /opt/homebrew/opt/fzf/shell/key-bindings.zsh ]]; then
+        source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
+        source /opt/homebrew/opt/fzf/shell/completion.zsh
+    elif [[ -f /usr/local/opt/fzf/shell/key-bindings.zsh ]]; then
+        source /usr/local/opt/fzf/shell/key-bindings.zsh
+        source /usr/local/opt/fzf/shell/completion.zsh
+    fi
+fi
+
+# zoxide - Better cd
+if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init --cmd cd zsh)"
+fi
+
+# =============================================================================
+# CUSTOM CONFIGURATIONS
+# =============================================================================
+
+
+# =============================================================================
+# LOCAL OVERRIDES
+# =============================================================================

@@ -1,1 +1,12 @@
-Dadroit
+# Ignore Dadroit, Autodesk, EasyEDA-Pro, GitHub Copilot, Raycast, GitHub CLI
+Dadroit/
+Autodesk/
+EasyEDA-Pro/
+github-copilot/
+gh/
+raycast/
+
+# Ignore Zed editor specific folders
+zed/conversations/**
+zed/prompts/**
+zed/themes/**
