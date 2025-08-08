@@ -16,6 +16,23 @@ if [ ! -d "$ZINIT_HOME" ]; then
    git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
 fi
 
+# FZF PREVIEW OPTIONS
+_preview_options="
+if [ -d {} ]; then
+  eza --long --tree --git --level=3 --color=always --icons=always --no-user --no-time --links --context --total-size {};
+elif [ -r {} ]; then
+  mime=\$(file --mime-type -b {});
+  if [[ \$mime == image/* ]]; then
+    echo \"📷 Image file: {}\"; 
+  elif [[ \$mime == text/* ]]; then
+    bat -n --color=always --wrap=auto {};
+  else
+    echo \"⚠️ Unsupported or binary file type: \$mime\";
+  fi;
+else
+  echo \"🚫 File not readable\";
+fi"
+
 # Source/Load zinit
 source "${ZINIT_HOME}/zinit.zsh"
 
@@ -39,8 +56,6 @@ zinit snippet OMZP::docker-compose
 autoload -Uz compinit && compinit
 
 zinit cdreplay -q
-
-
 
 # Keybindings
 bindkey -e
@@ -67,21 +82,30 @@ zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*:*:docker:*' option-stacking yes
 zstyle ':completion:*:*:docker-*:*' option-stacking yes
 zstyle ':completion:*' menu no
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
-zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
-
+zstyle ':fzf-tab:complete:cd:*' fzf-preview "${_preview_options//\{\}/\$realpath}"
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview "${_preview_options//\{\}/\$realpath}"
 
 # Aliases
-alias ls='ls --color'
 alias vim='nvim'
 alias c='clear'
+alias ls='eza --icons=always --color=always'
+alias bat 
 
 # Shell integrations
 eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 
 
+# Bat integration
+export BAT_THEME="Catppuccin Mocha"
+
+# FZF preview integration
+export FZF_DEFAULT_OPTS="--preview '$_preview_options'"
+
+
 # Start tmux if not already inside tmux or SSH
 # if [[ -z "$TMUX" ]] && [[ -z "$SSH_TTY" ]] && command -v tmux >/dev/null 2>&1; then
 #   exec tmux new-session -A -s main
 # fi
+
+fastfetch

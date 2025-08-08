@@ -7,6 +7,9 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "features": {
+    "edit_prediction_provider": "copilot"
+  },
   "icon_theme": "Material Icon Theme",
   "ssh_connections": [
     {
@@ -30,14 +33,19 @@
     }
   },
   "ui_font_size": 14,
-  "buffer_font_size": 15.0,
+  "buffer_font_size": 14.0,
   "theme": {
     "mode": "system",
     "light": "Catppuccin Latte",
     "dark": "Catppuccin Mocha"
   },
   // Font customization settings
-  "ui_font_family": "MonoLisa Nerd Font Mono",
+  "ui_font_family": "FiraCode Nerd Font Mono",
+  "terminal": {
+    "font_family": "FiraCode Nerd Font Mono",
+    "font_size": 14
+  },
+  // "ui_font_family": "MonoLisa Nerd Font Mono",
   // Basic editor customizarion
   "relative_line_numbers": true,
   "minimap": {
@@ -51,6 +59,7 @@
     "left_padding": 0.01,
     "right_padding": 0.01
   },
+  "soft_wrap": "bounded",
   "format_on_save": "on",
   "formatter": "language_server",
   // Language specific customizations
@@ -73,5 +82,11 @@
         }
       ]
     }
+  },
+  "file_types": {
+    "SQL": [
+      "sql",
+      "sql.j2"
+    ]
   }
 }

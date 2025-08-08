@@ -10,3 +10,5 @@ raycast/
 zed/conversations/**
 zed/prompts/**
 zed/themes/**
+
+lock.mdb

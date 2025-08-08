@@ -3,3 +3,5 @@ scripts
 .gitignore
 README.md
 .vscode
+
+old.zshrc
