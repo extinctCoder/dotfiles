@@ -1,0 +1,12 @@
+console_title_template = '{{ .Shell }} in {{ .Folder }}'
+version = 3
+final_space = true
+
+
+[[blocks]]
+type = 'prompt'
+alignment = 'left'
+newline = true
+[[blocks.segments]]
+type = 'path'
+style = 'fish'

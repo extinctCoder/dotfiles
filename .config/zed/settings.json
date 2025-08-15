@@ -29,14 +29,15 @@
     "default_profile": "ask",
     "default_model": {
       "provider": "copilot_chat",
-      "model": "claude-sonnet-4"
+      "model": "gpt-5"
     }
   },
   "ui_font_size": 14,
   "buffer_font_size": 14.0,
   "theme": {
     "mode": "system",
-    "light": "Catppuccin Latte",
+    // "light": "Catppuccin Latte",
+    "light": "Catppuccin Mocha",
     "dark": "Catppuccin Mocha"
   },
   // Font customization settings
@@ -59,6 +60,8 @@
     "left_padding": 0.01,
     "right_padding": 0.01
   },
+  "show_whitespaces": "selection",
+  "preferred_line_length": 90,
   "soft_wrap": "bounded",
   "format_on_save": "on",
   "formatter": "language_server",

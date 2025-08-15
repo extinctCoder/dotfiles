@@ -1,11 +1,8 @@
 font-family = FiraCode Nerd Font Mono
-font-size = 14
+font-size = 12
 theme = catppuccin-mocha
 
 background-opacity =  0.90
 background-blur = true
-
-window-padding-x = 22
-window-padding-y = 18
 
 window-padding-balance = true

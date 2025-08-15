@@ -2,7 +2,6 @@ if [[ -f "/opt/homebrew/bin/brew" ]] then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-
 HB_CNF_HANDLER="$(brew --repository)/Library/Taps/homebrew/homebrew-command-not-found/handler.sh"
 if [ -f "$HB_CNF_HANDLER" ]; then
 source "$HB_CNF_HANDLER";
@@ -25,8 +24,6 @@ elif [ -r {} ]; then
   mime=\$(file --mime-type -b {});
   if [[ \$mime == image/* ]]; then
     echo \"📷 Image file: {}\"; 
-  elif [[ \$mime == application/json ]]; then
-    bat -n --color=always --wrap=auto --language=json {};
   elif [[ \$mime == text/* ]]; then
     bat -n --color=always --wrap=auto {};
   else
@@ -42,24 +39,20 @@ source "${ZINIT_HOME}/zinit.zsh"
 # enable starship
 eval "$(starship init zsh)"
 
-# enable oh-my-posh
-# eval "$(oh-my-posh init zsh --config ~/.config/oh_my_posh.toml)"
-
 # Add in zsh plugins
 zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 zinit light Aloxaf/fzf-tab
-zinit light loiccoyle/zsh-github-copilot
 
 # Add in snippets
 zinit snippet OMZL::git.zsh
 zinit snippet OMZP::git
 zinit snippet OMZP::command-not-found
+zinit snippet OMZP::docker
+zinit snippet OMZP::docker-compose
 
-# load docker completions
-FPATH="$HOME/.docker/completions:$FPATH"
-
+# Load completions
 autoload -Uz compinit && compinit
 
 zinit cdreplay -q
@@ -69,8 +62,6 @@ bindkey -e
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
 bindkey '^[w' kill-region
-bindkey '»' zsh_gh_copilot_explain  # bind Option+shift+\ to explain
-bindkey '«' zsh_gh_copilot_suggest  # bind Option+\ to suggest
 
 # History
 HISTSIZE=5000
@@ -87,8 +78,12 @@ setopt hist_find_no_dups
 
 # Completion styling
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*:*:docker:*' option-stacking yes
+zstyle ':completion:*:*:docker-*:*' option-stacking yes
 zstyle ':completion:*' menu no
 zstyle ':fzf-tab:complete:cd:*' fzf-preview "${_preview_options//\{\}/\$realpath}"
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview "${_preview_options//\{\}/\$realpath}"
 
 # Aliases
 alias vim='nvim'
@@ -113,4 +108,4 @@ export FZF_DEFAULT_OPTS="--preview '$_preview_options'"
 #   exec tmux new-session -A -s main
 # fi
 
-# fastfetch
+fastfetch

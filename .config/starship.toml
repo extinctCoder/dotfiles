@@ -1,6 +1,5 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
-
 add_newline = true
 
 [fill]
@@ -10,7 +9,6 @@ symbol = ' '
 truncation_length = 2
 truncation_symbol = '…/'
 truncate_to_repo = false
-
 
 [character]
 success_symbol = "[→ ](bold green)"
