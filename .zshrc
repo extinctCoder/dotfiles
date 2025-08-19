@@ -1,6 +1,16 @@
+# Auto-update Homebrew once per day (86400 seconds = 24 hours)
+export HOMEBREW_AUTO_UPDATE_SECS=86400
+
+# Hide Homebrew environment hints in the terminal
+export HOMEBREW_NO_ENV_HINTS=1
+
 if [[ -f "/opt/homebrew/bin/brew" ]] then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
+
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - zsh)"
 
 
 HB_CNF_HANDLER="$(brew --repository)/Library/Taps/homebrew/homebrew-command-not-found/handler.sh"
@@ -24,7 +34,7 @@ if [ -d {} ]; then
 elif [ -r {} ]; then
   mime=\$(file --mime-type -b {});
   if [[ \$mime == image/* ]]; then
-    echo \"📷 Image file: {}\"; 
+    echo \"📷 Image file: {}\";
   elif [[ \$mime == application/json ]]; then
     bat -n --color=always --wrap=auto --language=json {};
   elif [[ \$mime == text/* ]]; then
@@ -89,6 +99,11 @@ setopt hist_find_no_dups
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' menu no
 zstyle ':fzf-tab:complete:cd:*' fzf-preview "${_preview_options//\{\}/\$realpath}"
+# zstyle ':fzf-tab:complete:git-branch:*' fzf-preview "git diff --color=always {-1}"
+zstyle ':fzf-tab:complete:git-branch:*' fzf-preview 'git diff --color=always {-1} | delta'
+
+
+# this is changed
 
 # Aliases
 alias vim='nvim'
@@ -114,3 +129,12 @@ export FZF_DEFAULT_OPTS="--preview '$_preview_options'"
 # fi
 
 # fastfetch
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/extinctcoder/.lmstudio/bin"
+# End of LM Studio CLI section
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/extinctcoder/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
