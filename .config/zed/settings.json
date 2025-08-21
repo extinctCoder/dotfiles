@@ -30,10 +30,10 @@
       "provider": "zed.dev",
       "model": "claude-3-7-sonnet"
     },
-    "default_profile": "write",
+    "default_profile": "ask",
     "default_model": {
       "provider": "copilot_chat",
-      "model": "gpt-5"
+      "model": "gpt-4.1"
     }
   },
   "ui_font_size": 14,
