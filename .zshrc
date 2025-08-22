@@ -107,10 +107,15 @@ export FZF_DEFAULT_OPTS="--preview '$_preview_options'"
 #---------------------------------
 # Aliases
 #---------------------------------
-alias vim='nvim'
 alias c='clear'
-alias ls='eza --icons=always --color=always'
 alias cat='bat'
+alias vim='nvim'
+alias reload='source ~/.zshrc'
+alias ls='eza --icons=always --color=always --git'
+alias vi='fd --type f --hidden --exclude .git . | fzf | xargs nvim'
+alias fcd='cd "$(fd --type d --hidden --exclude ".*" . | fzf )"'
+
+
 
 #---------------------------------
 # Functions
