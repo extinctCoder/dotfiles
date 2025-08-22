@@ -123,10 +123,7 @@ export BAT_THEME="Catppuccin Mocha"
 export FZF_DEFAULT_OPTS="--preview '$_preview_options'"
 
 
-# Start tmux if not already inside tmux or SSH
-# if [[ -z "$TMUX" ]] && [[ -z "$SSH_TTY" ]] && command -v tmux >/dev/null 2>&1; then
-#   exec tmux new-session -A -s main
-# fi
+
 
 # fastfetch
 
