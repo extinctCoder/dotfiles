@@ -44,6 +44,8 @@ if [[ -f "/opt/homebrew/bin/brew" ]] then
   if [ -f "$HB_CNF_HANDLER" ]; then
     source "$HB_CNF_HANDLER"
   fi
+  # Forgit Plugin
+  [ -f $HOMEBREW_PREFIX/share/forgit/forgit.plugin.zsh ] && source $HOMEBREW_PREFIX/share/forgit/forgit.plugin.zsh
 fi
 
 # Pyenv
@@ -68,10 +70,10 @@ autoload -Uz compinit && compinit
 # Zinit Plugins & Snippets
 #---------------------------------
 # Basic plugins
+zinit light Aloxaf/fzf-tab
 zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
-zinit light Aloxaf/fzf-tab
 zinit light loiccoyle/zsh-github-copilot
 
 # Snippets
@@ -114,8 +116,6 @@ alias reload='source ~/.zshrc'
 alias ls='eza --icons=always --color=always --git'
 alias vi='fd --type f --hidden --exclude .git . | fzf | xargs nvim'
 alias fcd='cd "$(fd --type d --hidden --exclude ".*" . | fzf )"'
-
-
 
 #---------------------------------
 # Functions
