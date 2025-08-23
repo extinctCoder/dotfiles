@@ -1,12 +1,67 @@
-console_title_template = '{{ .Shell }} in {{ .Folder }}'
 version = 3
 final_space = true
 
+[palette]
+os = "#ACB0BE"
+closer = "p:os"
+pink = "#F4B8E4"
+lavender = "#BABBF1"
+blue = "#8CAAEE"
 
+# LEFT PROMPT (main info)
 [[blocks]]
-type = 'prompt'
-alignment = 'left'
+type = "prompt"
+alignment = "left"
+
+  [[blocks.segments]]
+  type = "os"
+  style = "plain"
+  foreground = "p:os"
+  template = "{{.Icon}} "
+
+  [[blocks.segments]]
+  type = "path"
+  style = "plain"
+  foreground = "p:pink"
+    [blocks.segments.properties]
+    style = "agnoster_short"
+    folder_separator_icon = "/"
+    max_depth = 2
+    prefix = "../"
+    home_icon = "~"
+    home_folder_depth = 1
+  template = "{{ .Path }} "
+
+# RIGHT PROMPT (git)
+[[blocks]]
+type = "prompt"
+alignment = "right"
+
+  [[blocks.segments]]
+  type = "git"
+  style = "plain"
+  foreground = "p:lavender"
+    [blocks.segments.properties]
+    branch_icon = "\ue725 "
+    cherry_pick_icon = "\ue29b "
+    commit_icon = "\uf417 "
+    fetch_status = false
+    fetch_upstream_icon = false
+    merge_icon = "\ue727 "
+    no_commits_icon = "\uf0c3 "
+    rebase_icon = "\ue728 "
+    revert_icon = "\uf0e2 "
+    tag_icon = "\uf412 "
+  template = "{{ .HEAD }} "
+
+# PROMPT SYMBOL ON NEW LINE
+[[blocks]]
+type = "prompt"
+alignment = "left"
 newline = true
-[[blocks.segments]]
-type = 'path'
-style = 'fish'
+
+  [[blocks.segments]]
+  type = "text"
+  style = "plain"
+  foreground = "p:closer"
+  template = "\uf105 "

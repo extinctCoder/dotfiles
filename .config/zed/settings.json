@@ -30,7 +30,7 @@
       "provider": "zed.dev",
       "model": "claude-3-7-sonnet"
     },
-    "default_profile": "ask",
+    "default_profile": "write",
     "default_model": {
       "provider": "copilot_chat",
       "model": "gpt-4.1"
