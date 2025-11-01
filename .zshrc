@@ -154,3 +154,4 @@ eval "$(zoxide init --cmd cd zsh)"
 # Other Customizations
 #---------------------------------
 # (ADDITIONAL CUSTOMIZATIONS CAN BE ADDED HERE)
+fastfetch
