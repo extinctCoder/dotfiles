@@ -12,3 +12,5 @@ zed/prompts/**
 zed/themes/**
 
 lock.mdb
+
+lazy-lock.json

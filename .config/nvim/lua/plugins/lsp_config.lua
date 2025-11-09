@@ -19,14 +19,22 @@ return {
         config = function()
             local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
-            local lspconfig = require("lspconfig")
+            vim.lsp.config('lua_ls', {
+                capabilities = capabilities,
+                settings = {
+                    Lua = {
+                        diagnostics = {
+                            globals = { 'vim' }
+                        }
+                    }
+                }
+            })
+            vim.lsp.enable('lua_ls')
 
-            lspconfig.lua_ls.setup({
+            vim.lsp.config('pyright', {
                 capabilities = capabilities
             })
-            lspconfig.pyright.setup({
-                capabilities = capabilities
-            })
+            vim.lsp.enable('pyright')
 
             vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
             vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, {})
