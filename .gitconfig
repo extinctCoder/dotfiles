@@ -15,12 +15,15 @@
 
 [merge]
     conflictStyle = zdiff3
-[credential "https://github.com"]
-	helper = 
-	helper = !/usr/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-	helper = 
-	helper = !/usr/bin/gh auth git-credential
 [user]
-	email = extinctCoder@outlook.com
 	name = darthVader
+	email = extinctCoder@outlook.com
+
+[credential]
+	helper = osxkeychain
+[credential "https://github.com"]
+	helper =
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/opt/homebrew/bin/gh auth git-credential

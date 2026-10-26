@@ -1,8 +1,10 @@
 #---------------------------------
 # Environment Variables
 #---------------------------------
+export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/bin:/usr/local/bin:$PATH"
 export PATH="$PATH:$FORGIT_INSTALL_DIR/bin"
+export PATH="$HOME/.cargo/bin:$PATH"
 export EDITOR="vim"
 export BAT_THEME="Catppuccin Mocha"
 export HOMEBREW_NO_ENV_HINTS=1
@@ -10,6 +12,16 @@ export HOMEBREW_AUTO_UPDATE_SECS=86400
 export MANPAGER="sh -c 'col -bx | bat -l man -p --paging always'"
 export FZF_DEFAULT_OPTS="--inline-info"
 
+# Secrets (API keys, tokens) live in an untracked file outside version control.
+[ -f "$HOME/.secrets.zsh" ] && source "$HOME/.secrets.zsh"
+
+
+
+
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/libpq/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/libpq/include"
+export PKG_CONFIG_PATH="/opt/homebrew/opt/libpq/lib/pkgconfig"
 
 #---------------------------------
 # Exported Variables
@@ -38,9 +50,9 @@ setopt hist_find_no_dups
 if [[ -f "/opt/homebrew/bin/brew" ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
   # Homebrew Command Not Found Handler
-  HB_CNF_HANDLER="$(brew --repository)/Library/Taps/homebrew/homebrew-command-not-found/handler.sh"
-  if [ -f "$HB_CNF_HANDLER" ]; then
-    source "$HB_CNF_HANDLER"
+  HOMEBREW_COMMAND_NOT_FOUND_HANDLER="$(brew --repository)/Library/Homebrew/command-not-found/handler.sh"
+  if [ -f "$HOMEBREW_COMMAND_NOT_FOUND_HANDLER" ]; then
+    source "$HOMEBREW_COMMAND_NOT_FOUND_HANDLER";
   fi
   # Forgit Plugin
   [ -f "$HOMEBREW_PREFIX/share/forgit/forgit.plugin.zsh" ] && source "$HOMEBREW_PREFIX/share/forgit/forgit.plugin.zsh"
@@ -114,6 +126,7 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --long --tree --git --level=3 -
 alias c='clear'
 alias cat='bat'
 alias vim='nvim'
+alias top='btm'
 alias reload='source ~/.zshrc'
 alias ls='eza --icons=always --color=always --git'
 alias vi='fd --type f --hidden --exclude .git . | fzf | xargs nvim'
@@ -154,4 +167,10 @@ eval "$(zoxide init --cmd cd zsh)"
 # Other Customizations
 #---------------------------------
 # (ADDITIONAL CUSTOMIZATIONS CAN BE ADDED HERE)
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/extinctcoder/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
+
 fastfetch

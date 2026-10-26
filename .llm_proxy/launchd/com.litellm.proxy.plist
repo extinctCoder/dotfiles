@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.litellm.proxy</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>source $HOME/.zshrc && $HOME/.claude/bin/start-claude-proxy.sh</string>
+    </array>
+    
+    <key>RunAtLoad</key>
+    <true/>
+    
+    <key>KeepAlive</key>
+    <true/>
+    
+    <key>StandardOutPath</key>
+    <string>/tmp/litellm-proxy.log</string>
+    
+    <key>StandardErrorPath</string>
+    <string>/tmp/litellm-proxy-error.log</string>
+    
+    <key>WorkingDirectory</key>
+    <string>/Users/extinctcoder</string>
+</dict>
+</plist>

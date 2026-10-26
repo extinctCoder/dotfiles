@@ -11,6 +11,9 @@ zed/conversations/**
 zed/prompts/**
 zed/themes/**
 
-lock.mdb
+*lock.mdb
 
 lazy-lock.json
+
+# macOS
+.DS_Store

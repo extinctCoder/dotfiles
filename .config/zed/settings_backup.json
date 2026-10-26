@@ -7,7 +7,45 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
-  "icon_theme": "Material Icon Theme",
+  "context_servers": {
+    "mcp-postman-api": {
+      "enabled": true,
+      "command": "npx",
+      "args": [
+        "@postman/postman-mcp-server",
+        "--full"
+      ],
+      "env": {
+        "POSTMAN_API_KEY": ""
+      }
+    },
+    "mcp-server-gitlab": {
+      "enabled": true,
+      "settings": {
+        "gitlab_personal_access_token": ""
+      }
+    },
+    "mcp-server-context7": {
+      "enabled": true,
+      "settings": {
+        "context7_api_key": ""
+      }
+    }
+  },
+  "edit_predictions": {
+    "mode": "eager",
+    "copilot": {
+      "proxy": null,
+      "proxy_no_verify": null,
+      "enterprise_uri": null
+    },
+    "enabled_in_text_threads": false
+  },
+  "features": {
+    "edit_prediction_provider": "copilot"
+  },
+  "vim_mode": false,
+  "icon_theme": "Catppuccin Latte",
   "ssh_connections": [
     {
       "host": "192.168.1.60",
@@ -23,24 +61,217 @@
     }
   ],
   "agent": {
-    "default_profile": "ask",
-    "default_model": {
+    "profiles": {
+      "with-mcp": {
+        "name": "with_mcp",
+        "tools": {
+          "web_search": true,
+          "thinking": true,
+          "terminal": true,
+          "read_file": true,
+          "project_notifications": true,
+          "open": true,
+          "now": true,
+          "move_path": true,
+          "list_directory": true,
+          "grep": true,
+          "find_path": true,
+          "fetch": true,
+          "edit_file": true,
+          "diagnostics": true,
+          "delete_path": true,
+          "create_directory": true,
+          "copy_path": true
+        },
+        "enable_all_context_servers": false,
+        "context_servers": {
+          "mcp-postman-api": {
+            "tools": {
+              "updateWorkspaceTags": true,
+              "updateWorkspaceGlobalVariables": true,
+              "updateWorkspace": true,
+              "updateSpecProperties": true,
+              "updateSpecFile": true,
+              "updateResponseComment": true,
+              "updateRequestComment": true,
+              "updatePanElementOrFolder": true,
+              "updateMonitor": true,
+              "updateMock": true,
+              "updateFolderComment": true,
+              "updateCollectionTags": true,
+              "updateCollectionResponse": true,
+              "updateCollectionRequest": true,
+              "updateCollectionFolder": true,
+              "updateCollectionComment": true,
+              "updateApiCollectionComment": true,
+              "unpublishMock": true,
+              "unpublishDocumentation": true,
+              "transferCollectionResponses": true,
+              "transferCollectionRequests": true,
+              "transferCollectionFolders": true,
+              "syncSpecWithCollection": true,
+              "syncCollectionWithSpec": true,
+              "runMonitor": true,
+              "resolveCommentThread": true,
+              "putEnvironment": true,
+              "putCollection": true,
+              "pullCollectionChanges": true,
+              "publishMock": true,
+              "publishDocumentation": true,
+              "postPanElementOrFolder": true,
+              "patchEnvironment": true,
+              "patchCollection": true,
+              "mergeCollectionFork": true,
+              "getWorkspaces": true,
+              "getWorkspaceTags": true,
+              "getWorkspaceGlobalVariables": true,
+              "getWorkspace": true,
+              "getTaggedEntities": true,
+              "getStatusOfAnAsyncApiTask": true,
+              "getSpecFiles": true,
+              "getSpecFile": true,
+              "getSpecDefinition": true,
+              "getSpecCollections": true,
+              "getSpec": true,
+              "getSourceCollectionStatus": true,
+              "getResponseComments": true,
+              "getRequestComments": true,
+              "getMonitors": true,
+              "getMonitor": true,
+              "getMocks": true,
+              "getMock": true,
+              "getGeneratedCollectionSpecs": true,
+              "getFolderComments": true,
+              "getEnvironments": true,
+              "getEnvironment": true,
+              "getDuplicateCollectionTaskStatus": true,
+              "getCollectionsForkedByUser": true,
+              "getCollections": true,
+              "getCollectionUpdatesTasks": true,
+              "getCollectionTags": true,
+              "getCollectionResponse": true,
+              "getCollectionRequest": true,
+              "getCollectionForks": true,
+              "getCollectionFolder": true,
+              "getCollectionComments": true,
+              "getCollection": true,
+              "getAuthenticatedUser": true,
+              "getAsyncSpecTaskStatus": true,
+              "getAllSpecs": true,
+              "getAllPanAddElementRequests": true,
+              "getAllElementsAndFolders": true,
+              "generateSpecFromCollection": true,
+              "generateCollection": true,
+              "duplicateCollection": true,
+              "deleteWorkspace": true,
+              "deleteSpecFile": true,
+              "deleteSpec": true,
+              "deleteResponseComment": true,
+              "deleteRequestComment": true,
+              "deletePanElementOrFolder": true,
+              "deleteMonitor": true,
+              "deleteMock": true,
+              "deleteFolderComment": true,
+              "deleteEnvironment": true,
+              "deleteCollectionResponse": true,
+              "deleteCollectionRequest": true,
+              "deleteCollectionFolder": true,
+              "deleteCollectionComment": true,
+              "deleteCollection": true,
+              "deleteApiCollectionComment": true,
+              "createWorkspace": true,
+              "createSpecFile": true,
+              "createSpec": true,
+              "createResponseComment": true,
+              "createRequestComment": true,
+              "createMonitor": true,
+              "createMock": true,
+              "createFolderComment": true,
+              "createEnvironment": true,
+              "createCollectionResponse": true,
+              "createCollectionRequest": true,
+              "createCollectionFork": true,
+              "createCollectionFolder": true,
+              "createCollection": true,
+              "createCollectionComment": true
+            }
+          },
+          "mcp-server-sequential-thinking": {
+            "tools": {
+              "sequentialthinking": true
+            }
+          },
+          "mcp-server-gitlab": {
+            "tools": {
+              "search_repositories": true,
+              "push_files": true,
+              "get_file_contents": true,
+              "fork_repository": true,
+              "create_repository": true,
+              "create_or_update_file": true,
+              "create_merge_request": true,
+              "create_issue": true,
+              "create_branch": true
+            }
+          },
+          "mcp-server-context7": {
+            "tools": {
+              "resolve-library-id": true,
+              "get-library-docs": true
+            }
+          }
+        }
+      }
+    },
+    "play_sound_when_agent_done": true,
+    "always_allow_tool_actions": true,
+    "inline_assistant_model": {
       "provider": "copilot_chat",
       "model": "claude-sonnet-4"
     },
-    "version": "2"
+    "default_profile": "ask",
+    "default_model": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-5-thinking-latest"
+    }
   },
-  "ui_font_size": 14,
-  "buffer_font_size": 16,
+  "ui_font_size": 16,
+  "buffer_font_size": 16.0,
   "theme": {
     "mode": "system",
-    "light": "One Light",
+    // "light": "Catppuccin Latte",
+    "light": "Catppuccin Mocha",
     "dark": "Catppuccin Mocha"
   },
   // Font customization settings
+  // "ui_font_family": "FiraCode Nerd Font Mono",
+  "terminal": {
+    "font_family": "FiraCode Nerd Font Mono",
+    "font_size": 14
+  },
   "ui_font_family": "MonoLisa Nerd Font Mono",
+  // "ui_font_family": "Inconsolata Nerd Font Mono",
+  "ui_font_fallbacks": [
+    "Inconsolata Nerd Font Mono"
+  ],
   // Basic editor customizarion
-  "relative_line_numbers": true,
+  "relative_line_numbers": "enabled",
+  "unnecessary_code_fade": 0.5,
+  "tab_size": 2,
+  "minimap": {
+    "show": "always",
+    "current_line_highlight": "all"
+  },
+  "scrollbar": {
+    "show": "never"
+  },
+  "centered_layout": {
+    "left_padding": 0.01,
+    "right_padding": 0.01
+  },
+  "show_whitespaces": "selection",
+  "preferred_line_length": 120,
+  "soft_wrap": "bounded",
   "format_on_save": "on",
   "formatter": "language_server",
   // Language specific customizations
@@ -62,6 +293,11 @@
           }
         }
       ]
+    }
+  },
+  "crates-lsp": {
+    "env": {
+      "GITHUB_TOKEN": ""
     }
   }
 }

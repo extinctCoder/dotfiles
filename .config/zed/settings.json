@@ -1,99 +1,141 @@
-// Zed settings
-//
-// For information on how to configure Zed, see the Zed
-// documentation: https://zed.dev/docs/configuring-zed
-//
-// To see all of Zed's default settings without changing your
-// custom settings, run `zed: open default settings` from the
-// command palette (cmd-shift-p / ctrl-shift-p)
+// Zed settings — https://zed.dev/docs/configuring-zed
 {
-  "features": {
-    "edit_prediction_provider": "copilot"
-  },
-  "icon_theme": "Catppuccin Mocha",
-  "ssh_connections": [
-    {
-      "host": "192.168.1.60",
-      "username": "extinctcoder",
-      "projects": [
-        {
-          "paths": [
-            "~/ros2_ws/src"
-          ]
+    // ── AI / models ─────────────────────────────────────────────
+    // Heavy lifting + anything needing real comprehension: Claude via ACP agent.
+    "cli_default_open_behavior": "new_window",
+    "agent_servers": {
+        "claude-acp": {
+            "type": "registry"
         }
-      ],
-      "nickname": "lattepanda"
-    }
-  ],
-  "agent": {
-    "inline_assistant_model": {
-      "provider": "zed.dev",
-      "model": "claude-3-7-sonnet"
     },
-    "default_profile": "write",
-    "default_model": {
-      "provider": "copilot_chat",
-      "model": "gpt-4.1"
-    }
-  },
-  "ui_font_size": 14,
-  "buffer_font_size": 14.0,
-  "theme": {
-    "mode": "system",
-    // "light": "Catppuccin Latte",
-    "light": "Catppuccin Mocha",
-    "dark": "Catppuccin Mocha"
-  },
-  // Font customization settings
-  "ui_font_family": "FiraCode Nerd Font Mono",
-  "terminal": {
-    "font_family": "FiraCode Nerd Font Mono",
-    "font_size": 14
-  },
-  // "ui_font_family": "MonoLisa Nerd Font Mono",
-  // Basic editor customizarion
-  "relative_line_numbers": true,
-  "minimap": {
-    "show": "always",
-    "current_line_highlight": "all"
-  },
-  "scrollbar": {
-    "show": "never"
-  },
-  "centered_layout": {
-    "left_padding": 0.01,
-    "right_padding": 0.01
-  },
-  "show_whitespaces": "selection",
-  "preferred_line_length": 90,
-  "soft_wrap": "bounded",
-  "format_on_save": "on",
-  "formatter": "language_server",
-  // Language specific customizations
-  "languages": {
-    "Python": {
-      "language_servers": [
-        "ruff",
-        "pyright",
-        "codebook"
-      ],
-      "code_actions_on_format": {
-        "source.fixAll.ruff": true,
-        "source.organizeImports.ruff": true
-      },
-      "formatter": [
-        {
-          "language_server": {
-            "name": "ruff"
-          }
+    "agent": {
+        "dock": "right",
+        "default_profile": "ask",
+        // Commit messages → smallest capable local model (speed, not size).
+        "default_model": {
+            "provider": "ollama",
+            "model": "qwen2.5-coder:7b-instruct",
+            "enable_thinking": false
+        },
+        // cmd+enter inline transforms → local ceiling for 24GB w/ the stack up.
+        "inline_assistant_model": {
+            "provider": "ollama",
+            "model": "qwen2.5-coder:14b-instruct",
+            "enable_thinking": false
+        },
+        "favorite_models": [],
+        "model_parameters": []
+    },
+    // Inline next-edit ghost text → local Sweep-Next-Edit-1.5B via native Ollama provider.
+    "edit_predictions": {
+        "provider": "ollama",
+        "ollama": {
+            "api_url": "http://localhost:11434",
+            "model": "sweep-next-edit",
+            "prompt_format": "sweep",
+            "max_output_tokens": 512
         }
-      ]
+    },
+    "context_servers": {
+        "mcp-server-sequential-thinking": {
+            "enabled": false,
+            "remote": false,
+            "settings": {}
+        },
+        "mcp-server-context7": {
+            "enabled": false,
+            "remote": false,
+            "settings": {}
+        }
+    },
+    "language_models": {
+        "openai_compatible": {}
+    },
+    // ── Appearance ──────────────────────────────────────────────
+    "theme": {
+        "mode": "dark",
+        "light": "Catppuccin Latte",
+        "dark": "Catppuccin Macchiato"
+    },
+    "icon_theme": {
+        "mode": "dark",
+        "light": "Catppuccin Mocha",
+        "dark": "Material Icon Theme"
+    },
+    "buffer_font_family": "FiraCode Nerd Font Mono",
+    "buffer_font_size": 14.0,
+    // ── Editor ──────────────────────────────────────────────────
+    "vim_mode": false,
+    "relative_line_numbers": "enabled",
+    "tab_size": 4,
+    "preferred_line_length": 120,
+    "soft_wrap": "bounded",
+    "show_whitespaces": "selection",
+    "unnecessary_code_fade": 0.25,
+    // Inline type / parameter hints from the language server (Zed defaults these off).
+    "inlay_hints": {
+        "enabled": true,
+        "show_type_hints": true,
+        "show_parameter_hints": true,
+        "show_other_hints": true,
+        "show_background": false
+    },
+    "format_on_save": "on",
+    "formatter": "language_server",
+    // Completion menu: LSP symbols + names already in your buffers.
+    "show_completions_on_input": true,
+    "completions": {
+        "words": "enabled",
+        "words_min_length": 3,
+        "lsp": true
+    },
+    "scrollbar": {
+        "show": "never"
+    },
+    "minimap": {
+        "show": "always",
+        "current_line_highlight": "all",
+        "display_in": "active_editor"
+    },
+    // ── Panels ──────────────────────────────────────────────────
+    "project_panel": {
+        "dock": "left"
+    },
+    "outline_panel": {
+        "dock": "left"
+    },
+    "collaboration_panel": {
+        "dock": "left"
+    },
+    "git_panel": {
+        "group_by": "status",
+        "tree_view": true,
+        "dock": "left"
+    },
+    // ── Terminal ────────────────────────────────────────────────
+    "terminal": {
+        "font_family": "FiraCode Nerd Font Mono",
+        "font_size": 14
+    },
+    // ── Languages ───────────────────────────────────────────────
+    "languages": {
+        "Python": {
+            "language_servers": [
+                "ruff",
+                "pyright",
+                "codebook"
+            ],
+            "formatter": [
+                {
+                    "language_server": {
+                        "name": "ruff"
+                    }
+                }
+            ],
+            "code_actions_on_format": {
+                "source.fixAll.ruff": true,
+                "source.organizeImports.ruff": true
+            }
+        }
     }
-  },
-  "file_types": {
-    "SQL": [
-      "sql",
-      "sql.j2"
-    ]
-  }
 }
