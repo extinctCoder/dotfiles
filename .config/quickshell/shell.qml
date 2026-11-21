@@ -12,6 +12,6 @@ ShellRoot {
     Notifications {}
     Osd {}
     MusicCard {}
-    Keys {}
+    Cheatsheet {}
     Lock {}
 }
