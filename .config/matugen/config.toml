@@ -1,5 +1,12 @@
 [config]
 
+[config.custom_colors]
+red = { color = "#e06c75", blend = true }
+green = { color = "#98c379", blend = true }
+yellow = { color = "#e5c07b", blend = true }
+cyan = { color = "#56b6c2", blend = true }
+
+# Quickshell hot-reloads when this file changes, so no hook needed
 [templates.quickshell]
 input_path = "~/.config/matugen/templates/Colors.qml"
 output_path = "~/.config/quickshell/Colors.qml"
@@ -7,10 +14,12 @@ output_path = "~/.config/quickshell/Colors.qml"
 [templates.hyprland]
 input_path = "~/.config/matugen/templates/colors.lua"
 output_path = "~/.config/hypr/colors.lua"
+post_hook = "hyprctl reload"
 
 [templates.ghostty]
 input_path = "~/.config/matugen/templates/ghostty"
 output_path = "~/.config/ghostty/themes/matugen"
+post_hook = "pkill -USR2 -x ghostty"
 
 [templates.gtk3]
 input_path = "~/.config/matugen/templates/gtk.css"
@@ -19,3 +28,8 @@ output_path = "~/.config/gtk-3.0/gtk.css"
 [templates.gtk4]
 input_path = "~/.config/matugen/templates/gtk.css"
 output_path = "~/.config/gtk-4.0/gtk.css"
+
+[templates.nvim]
+input_path = "~/.config/matugen/templates/nvim.lua"
+output_path = "~/.config/nvim/colors/matugen.lua"
+post_hook = "pkill -SIGUSR1 nvim"

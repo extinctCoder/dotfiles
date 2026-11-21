@@ -30,3 +30,8 @@ hl.window_rule({
 
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd("ghostty"))
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("qs ipc call launcher toggle"))
+
+hl.bind(mainMod .. " + w", hl.dsp.exec_cmd("ghostty --class=tui.float -e nmtui"))
+hl.bind(mainMod .. " + h", hl.dsp.exec_cmd("ghostty --class=tui.float -e bluetui"))
+hl.bind(mainMod .. " + a", hl.dsp.exec_cmd("ghostty --class=tui.float -e wiremix"))
+hl.bind(mainMod .. " + m", hl.dsp.exec_cmd("ghostty --class=tui.float -e btop"))
