@@ -15,5 +15,6 @@ ShellRoot {
     Battery {}
     Cheatsheet {}
     PowerMenu {}
+    WallpaperPicker {}
     Lock {}
 }
