@@ -7,6 +7,7 @@
 #   sudo cp /etc/kernel/cmdline.bak /etc/kernel/cmdline
 #   sudo rm /etc/dracut.conf.d/plymouth.conf /etc/systemd/system/plymouth-quit.service.d/retain-splash.conf
 #   sudo reinstall-kernels
+#   boot menu back: set 'timeout 5' in $(bootctl --print-esp-path)/loader/loader.conf
 set -e
 repo=$(cd "$(dirname "$0")/.." && pwd)
 theme=/usr/share/plymouth/themes/minimal
@@ -46,6 +47,16 @@ echo "kernel options: $(cat /etc/kernel/cmdline)"
 sudo install -D -m 644 "$repo/boot/plymouth/retain-splash.conf" \
     /etc/systemd/system/plymouth-quit.service.d/retain-splash.conf
 sudo systemctl daemon-reload
+
+# hide the kernel picker: boot straight into the default entry.
+# Hold Space while the laptop starts to get the menu back when you need it.
+loader="$(bootctl --print-esp-path)/loader/loader.conf"
+if sudo grep -q '^timeout' "$loader"; then
+    sudo sed -i 's/^timeout.*/timeout menu-hidden/' "$loader"
+else
+    echo 'timeout menu-hidden' | sudo tee -a "$loader" >/dev/null
+fi
+sudo bootctl set-timeout "" 2>/dev/null || true # drop any timeout saved from inside the menu
 
 # rebuild boot images and entries (EndeavourOS + systemd-boot)
 sudo reinstall-kernels
