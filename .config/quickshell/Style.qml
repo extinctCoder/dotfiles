@@ -3,7 +3,7 @@ import Quickshell
 import QtQuick
 
 Singleton {
-    readonly property real fontScale: 1
+    readonly property real fontScale: 1.33 // Quickshell sizes in pixels, Ghostty/GTK in points (1pt = 1.33px)
     readonly property real spacingScale: 1
     readonly property real animScale: 1
 
@@ -22,7 +22,7 @@ Singleton {
     readonly property real panelOpacity: 0.85
     readonly property int anim: Math.round(120 * animScale)
 
-    readonly property int barHeight: 26
-    readonly property int rowHeight: 24
+    readonly property int barHeight: Math.round(26 * fontScale)
+    readonly property int rowHeight: Math.round(24 * fontScale)
     readonly property string wallpaperDir: Quickshell.env("HOME") + "/Pictures/wallpapers"
 }
