@@ -9,7 +9,7 @@ import qs.services
 
 Scope {
     id: root
-    readonly property bool lockOnStart: true // login screen behavior
+    readonly property bool lockOnStart: false // greetd is the login now; true = lock when the shell starts
     property string password: ""
     property string status: ""
     property bool busy: false

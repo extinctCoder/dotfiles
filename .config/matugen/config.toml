@@ -10,6 +10,7 @@ cyan = { color = "#56b6c2", blend = true }
 [templates.quickshell]
 input_path = "~/.config/matugen/templates/Colors.qml"
 output_path = "~/.config/quickshell/theme/Colors.qml"
+post_hook = "~/.config/matugen/hooks/greeter-sync" # keep the login screen in sync
 
 [templates.hyprland]
 input_path = "~/.config/matugen/templates/colors.lua"

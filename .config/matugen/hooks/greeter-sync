@@ -1,0 +1,23 @@
+#!/bin/sh
+# Copy the login screen and your current look (theme, wallpaper, user name) to
+# /var/lib/qs-greeter, which greetd's "greeter" user can read (it can't read ~).
+# matugen runs this after every wallpaper change. Does nothing until
+# greeter/install.sh has created that folder.
+set -e
+dest=/var/lib/qs-greeter
+[ -w "$dest" ] || exit 0
+
+# stowed from <repo>/.config/matugen/hooks/greeter-sync; find the repo from it
+repo=$(dirname "$(dirname "$(dirname "$(dirname "$(readlink -f "$0")")")")")
+theme="$HOME/.config/quickshell/theme"
+
+mkdir -p "$dest/theme"
+cp "$repo/greeter/quickshell/shell.qml" "$dest/shell.qml"
+cp "$theme/Style.qml" "$dest/theme/Style.qml"
+[ -f "$theme/Colors.qml" ] && cp "$theme/Colors.qml" "$dest/theme/Colors.qml"
+
+wall=$(cat "$HOME/.local/state/wallpaper" 2>/dev/null || true)
+[ -n "$wall" ] && [ -f "$wall" ] && cp -L "$wall" "$dest/wallpaper"
+
+printf '%s' "$(id -un)" > "$dest/user"
+chmod -R a+rX "$dest"
