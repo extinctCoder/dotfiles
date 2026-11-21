@@ -4,44 +4,20 @@ blocks:
   - type: prompt
     alignment: left
     segments:
-      - type: os
-        style: plain
-        foreground: white
-        template: "{{ .Icon }} "
       - type: path
         style: plain
-        foreground: magenta
+        foreground: blue
         template: "{{ .Path }} "
         properties:
-          style: agnoster_short
-          max_depth: 2
-          folder_separator_icon: /
-          home_icon: "~"
-      - type: executiontime
-        style: plain
-        foreground: yellow
-        template: "{{ .FormattedMs }} "
-        properties:
-          threshold: 2000
-  - type: prompt
-    alignment: right
-    segments:
+          style: folder
       - type: git
         style: plain
-        foreground: blue
-        template: "{{ .HEAD }}{{ if .Working.Changed }}*{{ end }} "
-        properties:
-          fetch_status: true
-  - type: prompt
-    alignment: left
-    newline: true
-    segments:
+        foreground: magenta
+        template: "{{ .HEAD }} "
       - type: text
         style: plain
-        foreground: green
-        foreground_templates:
-          - "{{ if gt .Code 0 }}red{{ end }}"
-        template: "\uf105 "
+        foreground: white
+        template: "> "
 transient_prompt:
   foreground: blue
-  template: "\uf105 "
+  template: "> "

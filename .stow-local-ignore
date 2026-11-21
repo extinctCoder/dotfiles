@@ -1,8 +1,5 @@
-\.git
-\.gitignore
-^/README.*
-^/SETUP\.md
-^/setup\.sh
-^/system
+.git
+.gitignore
+
 ^/tmp_sys
 ^/\.stow-local-ignore
