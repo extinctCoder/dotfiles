@@ -33,3 +33,8 @@ output_path = "~/.config/gtk-4.0/gtk.css"
 input_path = "~/.config/matugen/templates/nvim.lua"
 output_path = "~/.config/nvim/colors/matugen.lua"
 post_hook = "pkill -SIGUSR1 nvim"
+
+[templates.tmux]
+input_path = "~/.config/matugen/templates/tmux.conf"
+output_path = "~/.config/tmux/colors.conf"
+post_hook = "tmux source-file ~/.config/tmux/colors.conf"
