@@ -14,4 +14,4 @@ source <(fzf --zsh)
 eval "$(oh-my-posh init zsh --config ~/.config/ohmyposh/config.yaml)"
 
 export BAT_THEME=ansi
-alias ls='eza --icons'
+alias ls='eza --icons=auto' # =auto: a bare --icons swallows the next word (the path) as its value
