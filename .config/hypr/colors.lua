@@ -1,3 +1,5 @@
+---@diagnostic disable: undefined-global
+
 hl.config({
     general = {
         col = {
