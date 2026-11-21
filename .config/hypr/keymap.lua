@@ -17,7 +17,7 @@ local locked = { locked = true }
 
 -- apps
 bind("SUPER + return", "ghostty", "terminal", "apps")
-bind("SUPER + b", "helium-browser", "browser", "apps")
+bind("SUPER + b", "helcanium", "browser", "apps")
 bind("SUPER + e", "ghostty -e yazi", "files", "apps")
 bind("SUPER + c", "ghostty -e nvim", "editor", "apps")
 bind("SUPER + m", tui .. "btop", "monitor", "apps")
@@ -73,7 +73,7 @@ bind("XF86AudioPrev", "playerctl previous", "previous track", "media", locked)
 
 -- leader menu: SUPER + d, then one key (shell commands only)
 leader("t", "ghostty", "terminal")
-leader("b", "helium-browser", "browser")
+leader("b", "helcanium", "browser")
 leader("f", "ghostty -e yazi", "files")
 leader("e", "ghostty -e nvim", "editor")
 leader("w", tui .. "nmtui", "wifi")
