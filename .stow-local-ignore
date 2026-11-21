@@ -1,5 +1,5 @@
 .git
 .gitignore
 
-^/system
+^/tmp_sys
 ^/\.stow-local-ignore
