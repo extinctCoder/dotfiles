@@ -16,3 +16,6 @@
 @define-color dialog_bg_color {{colors.surface_container_high.default.hex}};
 @define-color dialog_fg_color {{colors.on_surface.default.hex}};
 @define-color destructive_color {{colors.error.default.hex}};
+
+/* minimal flat: square corners like the shell */
+* { border-radius: 0; }
