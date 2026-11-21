@@ -5,7 +5,7 @@
 #   rebuilds the boot images with EndeavourOS's reinstall-kernels.
 # Undo:
 #   sudo cp /etc/kernel/cmdline.bak /etc/kernel/cmdline
-#   sudo rm /etc/dracut.conf.d/plymouth.conf /etc/systemd/system/plymouth-quit.service.d/retain-splash.conf
+#   sudo rm /etc/dracut.conf.d/plymouth.conf
 #   sudo reinstall-kernels
 #   boot menu back: set 'timeout 5' in $(bootctl --print-esp-path)/loader/loader.conf
 set -e
@@ -43,9 +43,9 @@ for opt in quiet splash loglevel=3 rd.udev.log_level=3 vt.global_cursor_default=
 done
 echo "kernel options: $(cat /etc/kernel/cmdline)"
 
-# no console flash between the splash and the login screen
-sudo install -D -m 644 "$repo/boot/plymouth/retain-splash.conf" \
-    /etc/systemd/system/plymouth-quit.service.d/retain-splash.conf
+# an earlier version kept the splash on screen after Plymouth quit; that broke
+# logging in through greetd, so make sure it's gone
+sudo rm -f /etc/systemd/system/plymouth-quit.service.d/retain-splash.conf
 sudo systemctl daemon-reload
 
 # hide the kernel picker: boot straight into the default entry.
