@@ -53,7 +53,8 @@ ShellRoot {
         function onReadyToLaunch() {
             const d = root.session.desktop;
             root.status = "[ok] starting " + root.session.name;
-            Greetd.launch(["sh", "-c", root.session.exec],
+            // output to /dev/null: otherwise it prints on the console, which flashes between screens
+            Greetd.launch(["sh", "-c", "exec " + root.session.exec + " > /dev/null 2>&1"],
                 ["XDG_SESSION_TYPE=wayland", "XDG_CURRENT_DESKTOP=" + d, "XDG_SESSION_DESKTOP=" + d]);
         }
         function onError(error) {
