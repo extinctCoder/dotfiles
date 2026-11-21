@@ -18,6 +18,11 @@ sudo pacman -S --needed plymouth
 sudo install -d "$theme"
 sudo cp /usr/share/plymouth/themes/spinner/*.png "$theme/"
 sudo install -m 644 "$repo/boot/plymouth/minimal.plymouth" "$theme/minimal.plymouth"
+# our password dialog (shown if you add disk encryption): square field, ">" prompt,
+# square bullets, flat CAPS tag. These replace the stock spinner images.
+for img in entry bullet lock capslock; do
+    sudo install -m 644 "$repo/boot/plymouth/$img.png" "$theme/$img.png"
+done
 logo=$(find /usr/share/endeavouros /usr/share/pixmaps -iname '*endeavouros*.png' 2>/dev/null | head -n1)
 if [ -n "$logo" ]; then
     sudo cp "$logo" "$theme/watermark.png"

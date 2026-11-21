@@ -4,6 +4,8 @@ Description=Laptop maker logo (BGRT), distro logo and a thin progress bar on bla
 ModuleName=two-step
 
 [two-step]
+Font=FiraCode Nerd Font 12
+TitleFont=FiraCode Nerd Font 12
 ImageDir=/usr/share/plymouth/themes/minimal
 DialogHorizontalAlignment=.5
 DialogVerticalAlignment=.382
