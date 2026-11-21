@@ -32,4 +32,4 @@ output_path = "~/.config/gtk-4.0/gtk.css"
 [templates.nvim]
 input_path = "~/.config/matugen/templates/nvim.lua"
 output_path = "~/.config/nvim/colors/matugen.lua"
-post_hook = "pkill -SIGUSR1 nvim"
+post_hook = "pkill -SIGUSR1 nvim || true"

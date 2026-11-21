@@ -67,7 +67,7 @@ Scope {
 
             Image {
                 anchors.fill: parent
-                source: Colors.wallpaper !== "" ? "file://" + Colors.wallpaper : ""
+                source: Wall.path !== "" ? "file://" + Wall.path : ""
                 fillMode: Image.PreserveAspectCrop
             }
             Rectangle { anchors.fill: parent; color: "black"; opacity: 0.6 }
