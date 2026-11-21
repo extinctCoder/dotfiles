@@ -1,0 +1,23 @@
+version: 3
+final_space: true
+blocks:
+  - type: prompt
+    alignment: left
+    segments:
+      - type: path
+        style: plain
+        foreground: blue
+        template: "{{ .Path }} "
+        properties:
+          style: folder
+      - type: git
+        style: plain
+        foreground: magenta
+        template: "{{ .HEAD }} "
+      - type: text
+        style: plain
+        foreground: white
+        template: "> "
+transient_prompt:
+  foreground: blue
+  template: "> "

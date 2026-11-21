@@ -10,7 +10,7 @@ hl.config({
         shadow = { enabled = false }
     },
     input = {
-        touchpad = { natural_scroll = true, ["tap-to-click"] = true },
+        touchpad = { natural_scroll = true, ["tap_to_click"] = true },
     }
 })
 

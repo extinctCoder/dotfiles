@@ -1,0 +1,12 @@
+theme = matugen
+font-family = FiraCode Nerd Font
+font-size = 12
+background-opacity = 0.85
+window-decoration = false
+window-padding-x = 8
+window-padding-y = 8
+
+# Hyprland does the tiling, so drop Ghostty's own splits and tabs
+keybind = ctrl+shift+o=unbind
+keybind = ctrl+shift+e=unbind
+keybind = ctrl+shift+t=unbind
