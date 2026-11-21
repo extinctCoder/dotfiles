@@ -10,16 +10,17 @@ end
 local function leader(key, cmd, desc)
     table.insert(M.leader, { key, cmd, desc })
 end
-local tui = "ghostty --class=tui.float -e "
+local term = "ghostty +new-window"          -- fast: reuses the running Ghostty
+local tui = term .. " --title=tui.float -e " -- small floating window (rules.lua)
 local shots = "hyprshot -o ~/Pictures/Screenshots -m "
 local media = { locked = true, repeating = true } -- hold to repeat, works on the lock screen
 local locked = { locked = true }
 
 -- apps
-bind("SUPER + return", "ghostty", "terminal", "apps")
+bind("SUPER + return", term, "terminal", "apps")
 bind("SUPER + b", "helcanium", "browser", "apps")
-bind("SUPER + e", "ghostty -e yazi", "files", "apps")
-bind("SUPER + c", "ghostty -e nvim", "editor", "apps")
+bind("SUPER + e", term .. " -e yazi", "files", "apps")
+bind("SUPER + c", term .. " -e nvim", "editor", "apps")
 bind("SUPER + m", tui .. "btop", "monitor", "apps")
 
 -- shell
@@ -72,10 +73,10 @@ bind("XF86AudioNext", "playerctl next", "next track", "media", locked)
 bind("XF86AudioPrev", "playerctl previous", "previous track", "media", locked)
 
 -- leader menu: SUPER + d, then one key (shell commands only)
-leader("t", "ghostty", "terminal")
+leader("t", term, "terminal")
 leader("b", "helcanium", "browser")
-leader("f", "ghostty -e yazi", "files")
-leader("e", "ghostty -e nvim", "editor")
+leader("f", term .. " -e yazi", "files")
+leader("e", term .. " -e nvim", "editor")
 leader("w", tui .. "nmtui", "wifi")
 leader("h", tui .. "bluetui", "bluetooth")
 leader("a", tui .. "wiremix", "audio")

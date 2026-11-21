@@ -12,7 +12,7 @@ Scope {
     property string ssid: ""
 
     function tui(cmd) {
-        Quickshell.execDetached(["ghostty", "--class=tui.float", "-e", cmd]);
+        Quickshell.execDetached(["ghostty", "+new-window", "--title=tui.float", "-e", cmd]);
     }
 
     SystemClock { id: clock; precision: SystemClock.Minutes }

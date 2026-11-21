@@ -2,7 +2,7 @@
 
 -- system TUIs open small, floating and centered
 hl.window_rule({
-    match = { class = "^tui\\.float$" },
+    match = { title = "^tui\\.float$" },
     float = true,
     center =
         true

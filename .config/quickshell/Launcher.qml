@@ -77,7 +77,7 @@ Scope {
                     if (item === undefined) return;
                     if (root.mode === "apps") {
                         // execute() ignores Terminal=true, so run terminal apps inside Ghostty
-                        if (item.runInTerminal) Quickshell.execDetached(["ghostty", "-e"].concat(Array.from(item.command)));
+                        if (item.runInTerminal) Quickshell.execDetached(["ghostty", "+new-window", "-e"].concat(Array.from(item.command)));
                         else item.execute();
                     } else Quickshell.execDetached(["sh", "-c",
                         'printf "%s" "$1" | cliphist decode | wl-copy', "sh", item]);

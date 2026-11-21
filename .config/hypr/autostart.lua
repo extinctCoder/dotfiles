@@ -12,6 +12,8 @@ local gtk = table.concat({
 
 hl.on("hyprland.start", function()
     hl.exec_cmd("quickshell")
+    -- hidden Ghostty kept running, so `ghostty +new-window` opens windows instantly
+    hl.exec_cmd("ghostty --gtk-single-instance=true --initial-window=false --quit-after-last-window-closed=false")
     hl.exec_cmd("hypridle")
     hl.exec_cmd("hyprsunset") -- night light, see hyprsunset.conf
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
