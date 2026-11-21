@@ -24,5 +24,4 @@ Singleton {
 
     readonly property int barHeight: Math.round(26 * fontScale)
     readonly property int rowHeight: Math.round(24 * fontScale)
-    readonly property string wallpaperDir: Quickshell.env("HOME") + "/Pictures/wallpapers"
 }

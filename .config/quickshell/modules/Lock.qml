@@ -4,6 +4,8 @@ import Quickshell.Io
 import Quickshell.Services.Pam
 import QtQuick
 import QtQuick.Layouts
+import qs
+import qs.services
 
 Scope {
     id: root
@@ -59,8 +61,6 @@ Scope {
         }
     }
 
-    SystemClock { id: clock; precision: SystemClock.Minutes }
-
     WlSessionLock {
         id: sessionLock
         locked: false
@@ -81,12 +81,12 @@ Scope {
 
                 Mono {
                     Layout.alignment: Qt.AlignHCenter
-                    text: Qt.formatDateTime(clock.date, "HH:mm")
+                    text: Clock.format("HH:mm")
                     font.pixelSize: Style.fontXl * 2
                 }
                 Mono {
                     Layout.alignment: Qt.AlignHCenter
-                    text: Qt.formatDateTime(clock.date, "dddd dd MMMM").toLowerCase()
+                    text: Clock.format("dddd dd MMMM").toLowerCase()
                     color: Colors.fgMuted
                 }
 

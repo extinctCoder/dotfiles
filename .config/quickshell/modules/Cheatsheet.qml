@@ -1,57 +1,15 @@
 import Quickshell
 import Quickshell.Wayland
-import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
+import qs
+import qs.services
 
+// Super+/ : searchable cheatsheet of every keybind.
+// Super+D : leader menu (which-key): press one letter to run it, Esc to cancel.
 Scope {
-    id: root
-    property var binds: [] // { key, desc, group }
-    property var leader: [] // { key, desc, cmd }
-    property string mode: "" // "", "sheet" or "leader"
-
-    function openAs(m) {
-        loader.running = true; // re-read keymap.lua every time
-        mode = m;
-    }
-
-    Component.onCompleted: loader.running = true
-
-    Process {
-        id: loader
-        command: ["lua", "-e",
-            "package.path = os.getenv('HOME') .. '/.config/hypr/?.lua;' .. package.path " +
-            "local k = require('keymap') " +
-            "for _, b in ipairs(k.binds) do print('B\\t' .. b[1] .. '\\t' .. b[3] .. '\\t' .. b[4]) end " +
-            "for _, l in ipairs(k.leader) do print('L\\t' .. l[1] .. '\\t' .. l[3] .. '\\t' .. l[2]) end"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const b = [];
-                const l = [];
-                for (const line of text.split("\n")) {
-                    const f = line.split("\t");
-                    if (f[0] === "B") b.push({ key: f[1], desc: f[2], group: f[3] });
-                    if (f[0] === "L") l.push({ key: f[1], desc: f[2], cmd: f[3] });
-                }
-                root.binds = b;
-                root.leader = l;
-            }
-        }
-    }
-
-    IpcHandler {
-        target: "keys"
-        function cheatsheet(): void {
-            if (root.mode === "sheet") root.mode = ""; else root.openAs("sheet");
-        }
-        function leader(): void {
-            if (root.mode === "leader") root.mode = ""; else root.openAs("leader");
-        }
-    }
-
-    // ---------- cheatsheet ----------
     LazyLoader {
-        active: root.mode === "sheet"
+        active: Panels.open === "sheet"
 
         PanelWindow {
             anchors { top: true; bottom: true; left: true; right: true }
@@ -61,7 +19,9 @@ Scope {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
             WlrLayershell.namespace: "quickshell-cheatsheet"
 
-            MouseArea { anchors.fill: parent; onClicked: root.mode = "" }
+            Component.onCompleted: Keymap.reload() // re-read keymap.lua every time
+
+            MouseArea { anchors.fill: parent; onClicked: Panels.close() }
 
             Rectangle {
                 id: sheet
@@ -73,7 +33,7 @@ Scope {
 
                 MouseArea { anchors.fill: parent }
 
-                readonly property var rows: root.binds.filter(b =>
+                readonly property var rows: Keymap.binds.filter(b =>
                     (b.key + " " + b.desc + " " + b.group).toLowerCase()
                         .includes(search.text.toLowerCase()))
 
@@ -94,7 +54,7 @@ Scope {
                             font.family: Style.font
                             font.pixelSize: Style.fontLg
                             Component.onCompleted: forceActiveFocus()
-                            Keys.onEscapePressed: root.mode = ""
+                            Keys.onEscapePressed: Panels.close()
                         }
                     }
 
@@ -108,14 +68,15 @@ Scope {
                         model: sheet.rows
 
                         delegate: RowLayout {
+                            id: line
                             required property var modelData
                             width: ListView.view.width
                             height: Style.rowHeight
                             spacing: Style.pad
 
-                            Mono { Layout.preferredWidth: 110; text: modelData.group; color: Colors.fgMuted }
-                            Mono { Layout.preferredWidth: 260; text: modelData.key; color: Colors.accent }
-                            Mono { Layout.fillWidth: true; text: modelData.desc; elide: Text.ElideRight }
+                            Mono { Layout.preferredWidth: 110; text: line.modelData.group; color: Colors.fgMuted }
+                            Mono { Layout.preferredWidth: 260; text: line.modelData.key; color: Colors.accent }
+                            Mono { Layout.fillWidth: true; text: line.modelData.desc; elide: Text.ElideRight }
                         }
                     }
                 }
@@ -123,9 +84,8 @@ Scope {
         }
     }
 
-    // ---------- leader menu (which-key) ----------
     LazyLoader {
-        active: root.mode === "leader"
+        active: Panels.open === "leader"
 
         PanelWindow {
             anchors { bottom: true; left: true; right: true }
@@ -135,6 +95,8 @@ Scope {
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
             WlrLayershell.namespace: "quickshell-leader"
+
+            Component.onCompleted: Keymap.reload()
 
             Rectangle {
                 anchors { left: parent.left; right: parent.right; top: parent.top }
@@ -148,11 +110,11 @@ Scope {
                 Component.onCompleted: forceActiveFocus()
 
                 Keys.onPressed: event => {
-                    if (event.key === Qt.Key_Escape) { root.mode = ""; return; }
-                    const hit = root.leader.find(l => l.key === event.text);
+                    if (event.key === Qt.Key_Escape) { Panels.close(); return; }
+                    const hit = Keymap.leader.find(l => l.key === event.text);
                     if (hit) {
+                        Panels.close();
                         Quickshell.execDetached(["sh", "-c", hit.cmd]);
-                        root.mode = "";
                     }
                 }
 
@@ -164,13 +126,14 @@ Scope {
                     rowSpacing: Style.gap
 
                     Repeater {
-                        model: root.leader
+                        model: Keymap.leader
 
                         RowLayout {
+                            id: entry
                             required property var modelData
                             spacing: Style.pad
-                            Mono { text: modelData.key; color: Colors.accent; font.bold: true }
-                            Mono { text: modelData.desc }
+                            Mono { text: entry.modelData.key; color: Colors.accent; font.bold: true }
+                            Mono { text: entry.modelData.desc }
                         }
                     }
                 }

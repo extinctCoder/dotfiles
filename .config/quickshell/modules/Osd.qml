@@ -1,17 +1,17 @@
 import Quickshell
 import Quickshell.Wayland
-import Quickshell.Services.Pipewire
 import QtQuick
+import qs
+import qs.services
 
+// Volume popup: shows whenever volume or mute changes. Click-through.
 Scope {
     id: root
     property bool shown: false
-    readonly property var audio: Pipewire.defaultAudioSink?.audio ?? null
 
     Connections {
-        target: root.audio
-        function onVolumeChanged() { root.shown = true; hide.restart(); }
-        function onMutedChanged() { root.shown = true; hide.restart(); }
+        target: Audio
+        function onVolumeEvent() { root.shown = true; hide.restart(); }
     }
     Timer { id: hide; interval: 1200; onTriggered: root.shown = false }
 
@@ -37,11 +37,10 @@ Scope {
                 Mono {
                     anchors.centerIn: parent
                     text: {
-                        if (!root.audio) return "vol --";
-                        if (root.audio.muted) return "vol [   muted  ] --";
-                        const v = Math.round(root.audio.volume * 100);
-                        const n = Math.max(0, Math.min(10, Math.round(v / 10)));
-                        return "vol [" + "#".repeat(n) + "-".repeat(10 - n) + "] " + v + "%";
+                        if (!Audio.ready) return "vol --";
+                        if (Audio.muted) return "vol [   muted  ] --";
+                        const n = Math.max(0, Math.min(10, Math.round(Audio.volume / 10)));
+                        return "vol [" + "#".repeat(n) + "-".repeat(10 - n) + "] " + Audio.volume + "%";
                     }
                 }
             }
