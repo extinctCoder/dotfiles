@@ -19,7 +19,7 @@ Scope {
     Process {
         id: list
         command: ["sh", "-c",
-            'find "$1" -maxdepth 1 -type f | grep -iE "[.](jpe?g|png|webp)$" | sort',
+            'find -L "$1" -maxdepth 1 -type f | grep -iE "[.](jpe?g|png|webp)$" | sort',
             "sh", Style.wallpaperDir]
         stdout: StdioCollector {
             onStreamFinished: root.files = text.split("\n").filter(l => l.length > 0)

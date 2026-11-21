@@ -40,7 +40,7 @@ Scope {
         }
         function next(): void {
             apply.command = ["sh", "-c",
-                'f=$(find "$1" -type f | grep -iE "[.](jpe?g|png|webp)$" | shuf -n 1) && set -- "$f" "$2" && ' + script,
+                'f=$(find -L "$1" -type f | grep -iE "[.](jpe?g|png|webp)$" | shuf -n 1) && set -- "$f" "$2" && ' + script,
                 "sh", Style.wallpaperDir, Wall.stateFile];
             apply.running = true;
         }
