@@ -19,17 +19,20 @@ Scope {
         pam.start();
     }
 
-    // survives shell reloads, so a wallpaper change never relocks the screen
+    // Lock once per login, never on a reload (a wallpaper change reloads the shell).
+    // The decision runs in onLoaded: Quickshell restores these values during the
+    // reload stage, after Component.onCompleted, so checking earlier always saw
+    // the default and relocked mid-reload.
     PersistentProperties {
         id: persist
         reloadableId: "lockState"
         property bool startLockDone: false
-    }
 
-    Component.onCompleted: {
-        if (lockOnStart && !persist.startLockDone) {
-            persist.startLockDone = true;
-            sessionLock.locked = true;
+        onLoaded: {
+            if (root.lockOnStart && !startLockDone) {
+                startLockDone = true;
+                sessionLock.locked = true;
+            }
         }
     }
 
