@@ -1,5 +1,5 @@
 ---@diagnostic disable: undefined-global
-local keymap = require("keymap")
+local keymap = require("config.keymap")
 
 -- "hl.…" text becomes a Lua dispatcher; anything else runs as a shell command
 local function action(a)

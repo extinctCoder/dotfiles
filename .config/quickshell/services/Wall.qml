@@ -2,7 +2,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Io
 import QtQuick
-import qs
+import qs.theme
 
 // The wallpaper: current path, the folder's images, and setting a new one
 // (which also recolors everything through matugen).

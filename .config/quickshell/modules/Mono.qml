@@ -1,5 +1,5 @@
 import QtQuick
-import qs
+import qs.theme
 
 Text {
     color: Colors.fg

@@ -2,7 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import QtQuick.Layouts
-import qs
+import qs.theme
 import qs.services
 
 // Bottom-left desktop widget, under your windows, only while something plays.

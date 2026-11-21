@@ -1,7 +1,7 @@
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
-import qs
+import qs.theme
 import qs.services
 
 // Volume popup: shows whenever volume or mute changes. Click-through.

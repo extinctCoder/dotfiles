@@ -3,7 +3,7 @@ import Quickshell.Wayland
 import Quickshell.Services.Notifications
 import QtQuick
 import QtQuick.Layouts
-import qs
+import qs.theme
 import qs.services
 
 // Top-right stack, log-style lines. Left click: default action + close.

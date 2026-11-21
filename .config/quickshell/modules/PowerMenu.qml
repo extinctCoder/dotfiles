@@ -2,7 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import QtQuick.Layouts
-import qs
+import qs.theme
 import qs.services
 
 // Super+Shift+Escape or the bar's "power" button.

@@ -17,7 +17,7 @@ Singleton {
         id: loader
         command: ["lua", "-e",
             "package.path = os.getenv('HOME') .. '/.config/hypr/?.lua;' .. package.path " +
-            "local k = require('keymap') " +
+            "local k = require('config.keymap') " +
             "for _, b in ipairs(k.binds) do print('B\\t' .. b[1] .. '\\t' .. b[3] .. '\\t' .. b[4]) end " +
             "for _, l in ipairs(k.leader) do print('L\\t' .. l[1] .. '\\t' .. l[3] .. '\\t' .. l[2]) end"]
         stdout: StdioCollector {

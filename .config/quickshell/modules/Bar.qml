@@ -2,7 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import QtQuick.Layouts
-import qs
+import qs.theme
 import qs.services
 
 // Left: workspaces 1 2 [3] 4. Center: window title.

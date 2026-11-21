@@ -9,11 +9,11 @@ cyan = { color = "#56b6c2", blend = true }
 # Quickshell hot-reloads when this file changes, so no hook needed
 [templates.quickshell]
 input_path = "~/.config/matugen/templates/Colors.qml"
-output_path = "~/.config/quickshell/Colors.qml"
+output_path = "~/.config/quickshell/theme/Colors.qml"
 
 [templates.hyprland]
 input_path = "~/.config/matugen/templates/colors.lua"
-output_path = "~/.config/hypr/colors.lua"
+output_path = "~/.config/hypr/theme/colors.lua"
 post_hook = "hyprctl reload"
 
 [templates.ghostty]

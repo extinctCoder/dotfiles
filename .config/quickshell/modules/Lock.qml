@@ -4,7 +4,7 @@ import Quickshell.Io
 import Quickshell.Services.Pam
 import QtQuick
 import QtQuick.Layouts
-import qs
+import qs.theme
 import qs.services
 
 Scope {
