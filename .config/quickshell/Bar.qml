@@ -114,6 +114,13 @@ Scope {
                 Mono { text: "·"; color: Colors.border }
 
                 Mono { text: Qt.formatDateTime(clock.date, "ddd dd  HH:mm") }
+                Mono { text: "·"; color: Colors.border }
+
+                MonoButton {
+                    text: "power"
+                    color: Colors.fgMuted
+                    onClicked: Quickshell.execDetached(["qs", "ipc", "call", "power", "toggle"])
+                }
             }
         }
     }

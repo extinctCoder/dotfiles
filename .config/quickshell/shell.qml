@@ -14,5 +14,6 @@ ShellRoot {
     MusicCard {}
     Battery {}
     Cheatsheet {}
+    PowerMenu {}
     Lock {}
 }

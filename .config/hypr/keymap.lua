@@ -57,6 +57,7 @@ bind("SUPER + SHIFT + s", 'hl.dsp.window.move({ workspace = "special:magic" })',
 -- system
 bind("SUPER + escape", "qs ipc call lock lock", "lock screen", "system")
 bind("SUPER + SHIFT + e", "hl.dsp.exit()", "log out of Hyprland", "system")
+bind("SUPER + SHIFT + escape", "qs ipc call power toggle", "power menu", "system")
 bind("print", shots .. "region", "screenshot region", "system")
 bind("SHIFT + print", shots .. "output", "screenshot screen", "system")
 
