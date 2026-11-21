@@ -12,6 +12,7 @@ ShellRoot {
     Notifications {}
     Osd {}
     MusicCard {}
+    Battery {}
     Cheatsheet {}
     Lock {}
 }
