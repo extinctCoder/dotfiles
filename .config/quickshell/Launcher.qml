@@ -75,8 +75,11 @@ Scope {
                 function activate(index) {
                     const item = results[index];
                     if (item === undefined) return;
-                    if (root.mode === "apps") item.execute();
-                    else Quickshell.execDetached(["sh", "-c",
+                    if (root.mode === "apps") {
+                        // execute() ignores Terminal=true, so run terminal apps inside Ghostty
+                        if (item.runInTerminal) Quickshell.execDetached(["ghostty", "-e"].concat(Array.from(item.command)));
+                        else item.execute();
+                    } else Quickshell.execDetached(["sh", "-c",
                         'printf "%s" "$1" | cliphist decode | wl-copy', "sh", item]);
                     root.open = false;
                 }
