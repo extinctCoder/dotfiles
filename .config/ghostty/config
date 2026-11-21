@@ -7,6 +7,10 @@ window-padding-x = 8
 window-padding-y = 8
 confirm-close-surface = false
 
+# Size of floating windows (the TUIs), in character cells. Tiled windows ignore it.
+window-width = 100
+window-height = 30
+
 # Hyprland does the tiling, so drop Ghostty's own splits and tabs
 keybind = ctrl+shift+o=unbind
 keybind = ctrl+shift+e=unbind
