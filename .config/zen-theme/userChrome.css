@@ -1,0 +1,22 @@
+/* Zen, minimal and flat like the rest of the desktop.
+   Colors come live from Pywalfox (the browser theme); this file only sets
+   shape and type. Variable names checked in Zen's own source (zen-theme.css). */
+
+/* square corners everywhere (profile pictures and other circles stay round) */
+:root {
+  --zen-border-radius: 0px !important;
+  --border-radius-small: 0px !important;
+  --border-radius-medium: 0px !important;
+  --tab-border-radius: 0px !important;
+  --toolbarbutton-border-radius: 0px !important;
+  --urlbar-icon-border-radius: 0px !important;
+}
+
+/* the browser's own text in your mono font (web pages keep their fonts) */
+#navigator-toolbox,
+#urlbar,
+.tabbrowser-tab,
+menupopup,
+panel {
+  font-family: "FiraCode Nerd Font", monospace !important;
+}

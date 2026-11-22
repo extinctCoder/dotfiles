@@ -47,6 +47,12 @@ output_path = "~/.config/lazygit/config.yml"
 input_path = "~/.config/matugen/templates/qt6ct.conf"
 output_path = "~/.config/qt6ct/colors/matugen.conf"
 
+# Zen's colors, live: Pywalfox reads pywal's colors.json (same 16 colors as the terminal)
+[templates.pywal]
+input_path = "~/.config/matugen/templates/pywal-colors.json"
+output_path = "~/.cache/wal/colors.json"
+post_hook = "pywalfox update 2>/dev/null; true"
+
 # Helium's toolbar/tab colors (Chromium builds its palette from this one color).
 # The file is created by browser/install.sh; refresh only if Helium is running.
 [templates.helium]

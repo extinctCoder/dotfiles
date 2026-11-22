@@ -47,4 +47,6 @@ Singleton {
     readonly property string textSize: String.fromCodePoint(0xf027f)
     readonly property string shuffle: String.fromCodePoint(0xf049f)
     readonly property string grid: String.fromCodePoint(0xf0570)
+    readonly property string bookmark: String.fromCodePoint(0xf00c0)
+    readonly property string history: String.fromCodePoint(0xf02da)
 }

@@ -7,8 +7,9 @@ import qs.theme
 import qs.services
 
 // Super+Space: one box for everything. Plain text searches apps, actions, math,
-// files (3+ letters) and offers a Google search last. Prefixes narrow it:
-//   >  actions    /  files    =  calculator    ?  web search
+// files and Zen bookmarks/history (3+ letters), and offers a Google search last.
+// Prefixes narrow it:
+//   >  actions   /  files   @  bookmarks + history   =  calculator   ?  web search
 // Super+V opens the same box on clipboard history.
 // Arrows or Tab to move, Enter to run, Esc or click outside to close.
 LazyLoader {
@@ -36,12 +37,13 @@ LazyLoader {
             const t = text.trim();
             if (t.startsWith(">")) return Actions.search(t.slice(1).trim());
             if (t.startsWith("/")) return Files.results;
+            if (t.startsWith("@")) return Places.results;
             if (t.startsWith("=")) return Calc.rows(t.slice(1), true);
             if (t.startsWith("?")) return t.length > 1 ? [web(t.slice(1).trim())] : [];
             let out = Calc.rows(t, false);
             const items = Apps.rows(t).concat(Actions.search(t).map(a => Object.assign(a, { score: Apps.score(t, a.title) + 0.5 })));
             out = out.concat(items.sort((a, b) => a.score - b.score));
-            if (t.length >= 3) out = out.concat(Files.results.slice(0, 5));
+            if (t.length >= 3) out = out.concat(Places.results.slice(0, 3), Files.results.slice(0, 5));
             if (t !== "") out.push(web(t));
             return out.slice(0, 60);
         }
@@ -92,7 +94,8 @@ LazyLoader {
                             list.currentIndex = 0;
                             win.confirming = "";
                             const t = text.trim();
-                            Files.query = win.clip ? "" : t.startsWith("/") ? t.slice(1).trim() : (/^[>=?]/.test(t) ? "" : t);
+                            Files.query = win.clip ? "" : t.startsWith("/") ? t.slice(1).trim() : (/^[>=?@]/.test(t) ? "" : t);
+                            Places.query = win.clip ? "" : t.startsWith("@") ? t.slice(1).trim() : (/^[>=?/]/.test(t) ? "" : t);
                         }
                         Keys.onEscapePressed: Panels.close()
                         Keys.onDownPressed: list.incrementCurrentIndex()
@@ -104,7 +107,7 @@ LazyLoader {
                 }
                 Mono {
                     visible: !win.clip && input.text === ""
-                    text: "> actions   / files   = math   ? web"
+                    text: "> actions   / files   @ bookmarks   = math   ? web"
                     color: Colors.fgMuted
                     font.pixelSize: Style.fontSm
                 }
