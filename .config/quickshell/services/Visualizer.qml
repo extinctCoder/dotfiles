@@ -12,7 +12,7 @@ Singleton {
     property real bass: 0
     property real mid: 0
     property real high: 0
-    property real bassAvg: 0
+    property var recent: [] // last few bass values
     property real lastBeat: 0
     signal beat()
 
@@ -24,12 +24,14 @@ Singleton {
         root.mid = avg(8, 30);
         root.high = avg(30, b.length);
         const now = Date.now() / 1000;
-        // a beat: bass jumps well above its recent average (and not twice within 0.28 s)
-        if (root.bass > 0.25 && root.bass > root.bassAvg * 1.35 && now - root.lastBeat > 0.28) {
+        // a beat is an onset: bass climbs quickly from its recent low (not twice within 0.28 s).
+        // cava's auto-sensitivity keeps the level itself high, so the rise is what counts.
+        const low = root.recent.length ? Math.min(...root.recent) : root.bass;
+        if (root.bass > 0.3 && root.bass - low > 0.12 && now - root.lastBeat > 0.28) {
             root.lastBeat = now;
             root.beat();
         }
-        root.bassAvg = root.bassAvg * 0.92 + root.bass * 0.08;
+        root.recent = root.recent.slice(-3).concat([root.bass]);
     }
 
     Process {
