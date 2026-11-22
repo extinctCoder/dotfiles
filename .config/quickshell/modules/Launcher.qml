@@ -8,8 +8,9 @@ import qs.services
 
 // Super+Space: one box for everything. Plain text searches apps, actions, math,
 // files and Zen bookmarks/history (3+ letters), and offers a Google search last.
-// Prefixes narrow it:
+// A pasted link offers "play in mpv". Prefixes narrow it:
 //   >  actions   /  files   @  bookmarks + history   =  calculator   ?  web search
+//   yt <words>  YouTube search, plays in mpv
 // Super+V opens the same box on clipboard history.
 // Arrows or Tab to move, Enter to run, Esc or click outside to close.
 LazyLoader {
@@ -40,6 +41,10 @@ LazyLoader {
             if (t.startsWith("@")) return Places.results;
             if (t.startsWith("=")) return Calc.rows(t.slice(1), true);
             if (t.startsWith("?")) return t.length > 1 ? [web(t.slice(1).trim())] : [];
+            if (/^yt\s/i.test(t)) return YouTube.results.length ? YouTube.results
+                : [{ kind: "info", title: YouTube.busy ? "searching youtube..." : "no results", sub: "", glyph: Icons.youtube, run: () => {} }];
+            if (/^https?:\/\/\S+$/i.test(t))
+                return [{ kind: "url", title: "play in mpv", sub: t, glyph: Icons.play, run: () => YouTube.play(t) }, web(t)];
             let out = Calc.rows(t, false);
             const items = Apps.rows(t).concat(Actions.search(t).map(a => Object.assign(a, { score: Apps.score(t, a.title) + 0.5 })));
             out = out.concat(items.sort((a, b) => a.score - b.score));
@@ -66,7 +71,7 @@ LazyLoader {
 
             function activate(index) {
                 const item = results[index];
-                if (item === undefined) return;
+                if (item === undefined || item.kind === "info") return; // status rows do nothing
                 if (item.confirm && win.confirming !== item.title) { win.confirming = item.title; return; }
                 Panels.close();
                 item.run();
@@ -94,8 +99,9 @@ LazyLoader {
                             list.currentIndex = 0;
                             win.confirming = "";
                             const t = text.trim();
-                            Files.query = win.clip ? "" : t.startsWith("/") ? t.slice(1).trim() : (/^[>=?@]/.test(t) ? "" : t);
-                            Places.query = win.clip ? "" : t.startsWith("@") ? t.slice(1).trim() : (/^[>=?/]/.test(t) ? "" : t);
+                            Files.query = win.clip ? "" : t.startsWith("/") ? t.slice(1).trim() : (/^[>=?@]/.test(t) || /^yt\s/i.test(t) ? "" : t);
+                            Places.query = win.clip ? "" : t.startsWith("@") ? t.slice(1).trim() : (/^[>=?/]/.test(t) || /^yt\s/i.test(t) ? "" : t);
+                            YouTube.query = !win.clip && /^yt\s/i.test(t) ? t.slice(3).trim() : "";
                         }
                         Keys.onEscapePressed: Panels.close()
                         Keys.onDownPressed: list.incrementCurrentIndex()
@@ -107,7 +113,7 @@ LazyLoader {
                 }
                 Mono {
                     visible: !win.clip && input.text === ""
-                    text: "> actions   / files   @ bookmarks   = math   ? web"
+                    text: "> actions  / files  @ bookmarks  = math  ? web  yt youtube"
                     color: Colors.fgMuted
                     font.pixelSize: Style.fontSm
                 }

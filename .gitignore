@@ -6,3 +6,7 @@
 .config/btop/themes/matugen.theme
 .config/qt6ct/colors/
 .config/ghostty/size.conf
+# mpv: generated colors and links to packaged scripts (media/install.sh)
+.config/mpv/script-opts/
+.config/mpv/scripts/
+.config/mpv/fonts

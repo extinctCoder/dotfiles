@@ -26,6 +26,7 @@ Singleton {
         { name: "bluetooth on/off", glyph: Icons.bluetooth, keywords: "toggle", run: () => { const a = Bluetooth.defaultAdapter; if (a) a.enabled = !a.enabled; } },
         { name: "screenshot region", glyph: Icons.screenshot, keywords: "capture area", run: () => root.shot("region") },
         { name: "screenshot screen", glyph: Icons.screenshot, keywords: "capture monitor full", run: () => root.shot("output") },
+        { name: "play copied link in mpv", glyph: Icons.play, keywords: "youtube video url paste watch", run: () => Quickshell.execDetached(["sh", "-c", 'mpv "$(wl-paste)"']) },
         { name: "clipboard history", glyph: Icons.clipboard, keywords: "paste copy", run: () => Panels.open = "clip" },
         { name: "keybinds", glyph: Icons.keyboard, keywords: "cheatsheet shortcuts help", run: () => Panels.open = "sheet" },
         { name: "quick settings", glyph: Icons.tune, keywords: "notifications panel", run: () => Panels.open = "quick" },

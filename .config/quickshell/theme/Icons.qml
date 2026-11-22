@@ -49,4 +49,6 @@ Singleton {
     readonly property string grid: String.fromCodePoint(0xf0570)
     readonly property string bookmark: String.fromCodePoint(0xf00c0)
     readonly property string history: String.fromCodePoint(0xf02da)
+    readonly property string youtube: String.fromCodePoint(0xf05c3)
+    readonly property string play: String.fromCodePoint(0xf040c)
 }

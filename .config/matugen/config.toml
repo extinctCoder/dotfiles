@@ -47,6 +47,11 @@ output_path = "~/.config/lazygit/config.yml"
 input_path = "~/.config/matugen/templates/qt6ct.conf"
 output_path = "~/.config/qt6ct/colors/matugen.conf"
 
+# mpv's controls (uosc), read when mpv starts
+[templates.uosc]
+input_path = "~/.config/matugen/templates/uosc.conf"
+output_path = "~/.config/mpv/script-opts/uosc.conf"
+
 # Zen's colors, live: Pywalfox reads pywal's colors.json (same 16 colors as the terminal)
 [templates.pywal]
 input_path = "~/.config/matugen/templates/pywal-colors.json"
