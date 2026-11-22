@@ -6,6 +6,18 @@
 # built-in list with every fixed color removed, so each icon takes its file's
 # palette color instead. Icon glyphs are unchanged.
 
+# Mode and position pills in the status bar. Yazi's built-in theme only sets a
+# background and leaves the text in the terminal's default color: fine on a light
+# terminal, invisible on our dark one (light text on matugen's light accent).
+# Give every pill an explicit, contrasting text color instead.
+[mode]
+normal_main = { fg = "black", bg = "blue", bold = true }
+normal_alt  = { fg = "blue", bg = "black" }
+select_main = { fg = "black", bg = "red", bold = true }
+select_alt  = { fg = "red", bg = "black" }
+unset_main  = { fg = "black", bg = "red", bold = true }
+unset_alt   = { fg = "red", bg = "black" }
+
 [icon]
 globs = []
 dirs  = [
