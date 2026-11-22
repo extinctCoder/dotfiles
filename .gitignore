@@ -3,3 +3,4 @@
 .config/hypr/theme/colors.lua
 .config/ghostty/themes/matugen
 .config/nvim/colors/
+.config/btop/themes/matugen.theme

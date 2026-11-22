@@ -10,6 +10,7 @@ zinit light zsh-users/zsh-autosuggestions
 zinit light zsh-users/zsh-syntax-highlighting
 
 eval "$(zoxide init zsh)"
+export FZF_DEFAULT_OPTS="--color=16" # use the terminal palette, so fzf follows the wallpaper
 source <(fzf --zsh)
 eval "$(oh-my-posh init zsh --config ~/.config/ohmyposh/config.yaml)"
 
