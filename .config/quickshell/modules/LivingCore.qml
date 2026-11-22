@@ -104,7 +104,7 @@ Item {
     // ---------------- timing ----------------
     // Data arrives every ~2 s, like the desktop's graphs: targets are recomputed then.
     // Colors update 4 times a second (music and fever blend smoothly enough).
-    // Motion runs at 15 frames/s and only advances a few numbers; the GPU places
+    // Motion runs at 10 frames/s and only advances a few numbers; the GPU places
     // every particle. The desktop gives the core its own small window, so a motion
     // frame redraws only the core, not every widget.
     property real lastTick: 0
@@ -129,7 +129,7 @@ Item {
         onTriggered: core.paint()
     }
     Timer {
-        interval: 66
+        interval: 100 // 10 frames/s; all motion is time-based, so speed is unchanged
         repeat: true
         running: core.running && core.visible
         onRunningChanged: { core.lastTick = Date.now(); if (running) { core.sample(); core.paint(); } }
