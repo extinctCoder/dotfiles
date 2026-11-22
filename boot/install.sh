@@ -58,6 +58,13 @@ else
 fi
 sudo bootctl set-timeout "" 2>/dev/null || true # drop any timeout saved from inside the menu
 
+# remember the last kernel picked from the menu (Space at boot) as the default
+if sudo grep -q '^default' "$loader"; then
+    sudo sed -i 's/^default.*/default @saved/' "$loader"
+else
+    echo 'default @saved' | sudo tee -a "$loader" >/dev/null
+fi
+
 # rebuild boot images and entries (EndeavourOS + systemd-boot)
 sudo reinstall-kernels
 

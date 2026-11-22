@@ -7,7 +7,11 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "1" })
 
 hl.config({
     animations = { enabled = false },
-    misc = { disable_hyprland_logo = true, disable_splash_rendering = true },
+    misc = {
+        disable_hyprland_logo = true,
+        disable_splash_rendering = true,
+        background_color = "rgb(000000)", -- black like the boot splash: no color jump
+    },
     input = { kb_layout = "us", touchpad = { tap_to_click = true } },
 })
 
