@@ -3,7 +3,8 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 
-// Which overlay is open: "", "apps", "clip", "sheet", "leader", "power" or "picker".
+// Which overlay is open: "", "apps", "clip", "sheet", "leader", "power", "picker", "quick",
+// or a bar popup: "net", "cpu", "mem", "vol", "bat", "clock", "privacy".
 // One at a time: opening one closes the others.
 Singleton {
     id: root
@@ -45,6 +46,10 @@ Singleton {
         target: "keys"
         function cheatsheet(): void { root.toggle("sheet"); }
         function leader(): void { root.toggle("leader"); }
+    }
+    IpcHandler {
+        target: "quick"
+        function toggle(): void { root.toggle("quick"); }
     }
     IpcHandler {
         target: "power"

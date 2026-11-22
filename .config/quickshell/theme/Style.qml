@@ -1,9 +1,14 @@
 pragma Singleton
 import Quickshell
+import Quickshell.Io
 import QtQuick
 
 Singleton {
-    readonly property real fontScale: 1.33 // Quickshell sizes in pixels, Ghostty/GTK in points (1pt = 1.33px)
+    id: root
+    // Text size: TextSize writes ~/.local/state/textscale (one number, 1 = normal).
+    // Quickshell sizes in pixels, Ghostty/GTK in points (1pt = 1.33px).
+    property real userScale: 1
+    readonly property real fontScale: 1.33 * userScale
     readonly property real spacingScale: 1
     readonly property real animScale: 1
 
@@ -24,4 +29,15 @@ Singleton {
 
     readonly property int barHeight: Math.round(26 * fontScale)
     readonly property int rowHeight: Math.round(24 * fontScale)
+
+    FileView {
+        path: Quickshell.env("HOME") + "/.local/state/textscale"
+        printErrors: false // missing until the size is first changed
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: {
+            const s = Number(text().trim());
+            if (s >= 0.8 && s <= 1.5) root.userScale = s;
+        }
+    }
 }

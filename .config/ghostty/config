@@ -15,3 +15,6 @@ window-height = 30
 keybind = ctrl+shift+o=unbind
 keybind = ctrl+shift+e=unbind
 keybind = ctrl+shift+t=unbind
+
+# text size from the shell's knob (written by Quickshell; optional)
+config-file = ?size.conf

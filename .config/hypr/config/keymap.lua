@@ -29,6 +29,7 @@ bind("SUPER + v", "qs ipc call launcher clipboard", "clipboard history", "shell"
 bind("SUPER + d", "qs ipc call keys leader", "leader menu", "shell")
 bind("SUPER + slash", "qs ipc call keys cheatsheet", "keybind cheatsheet", "shell")
 bind("SUPER + n", "qs ipc call notifs clear", "clear notifications", "shell")
+bind("SUPER + a", "qs ipc call quick toggle", "quick settings + notifications", "shell")
 bind("SUPER + w", "qs ipc call picker toggle", "wallpaper picker", "shell")
 
 -- windows (vim directions)
@@ -67,8 +68,8 @@ bind("XF86AudioRaiseVolume", "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+", "
 bind("XF86AudioLowerVolume", "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-", "volume down", "media", media)
 bind("XF86AudioMute", "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle", "mute", "media", locked)
 bind("XF86AudioMicMute", "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle", "mic mute", "media", locked)
-bind("XF86MonBrightnessUp", "brightnessctl set 5%+", "brightness up", "media", media)
-bind("XF86MonBrightnessDown", "brightnessctl set 5%-", "brightness down", "media", media)
+bind("XF86MonBrightnessUp", "brightnessctl set 5%+ && qs ipc call brightness refresh", "brightness up", "media", media)
+bind("XF86MonBrightnessDown", "brightnessctl set 5%- && qs ipc call brightness refresh", "brightness down", "media", media)
 bind("XF86AudioPlay", "playerctl play-pause", "play / pause", "media", locked)
 bind("XF86AudioPause", "playerctl play-pause", "play / pause", "media", locked)
 bind("XF86AudioNext", "playerctl next", "next track", "media", locked)

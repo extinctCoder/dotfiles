@@ -1,12 +1,11 @@
 ---@diagnostic disable: undefined-global
 
--- GTK apps follow the desktop: dark adw-gtk3 theme, the mono font,
--- and no title bar buttons (Hyprland manages windows)
+-- GTK apps follow the desktop: dark adw-gtk3 theme, Papirus icons and no title
+-- bar buttons (Hyprland manages windows). Fonts: set by the shell's text size.
 local gtk = table.concat({
     "gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3-dark'",
     "gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'",
-    "gsettings set org.gnome.desktop.interface font-name 'FiraCode Nerd Font 11'",
-    "gsettings set org.gnome.desktop.interface monospace-font-name 'FiraCode Nerd Font 11'",
+    "gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'",
     "gsettings set org.gnome.desktop.wm.preferences button-layout ':'",
 }, "; ")
 

@@ -12,6 +12,17 @@ Singleton {
     readonly property bool charging: device?.state === UPowerDeviceState.Charging
     readonly property bool discharging: device?.state === UPowerDeviceState.Discharging
     readonly property bool low: percent <= 15 && !charging
+    readonly property real watts: Math.abs(device?.changeRate ?? 0)
+    readonly property real health: (device?.healthSupported ?? false) ? device.healthPercentage : -1
+    readonly property string status: charging ? "charging" : discharging ? "on battery"
+        : device?.state === UPowerDeviceState.FullyCharged ? "full" : "plugged in"
+    readonly property string timeLeft: duration(charging ? device?.timeToFull : device?.timeToEmpty)
+
+    function duration(s) {
+        if (!s || s <= 0) return "--";
+        const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+        return (h ? h + "h " : "") + m + "m";
+    }
 
     property int warned: 100 // lowest level already warned about
 
