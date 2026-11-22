@@ -18,6 +18,7 @@ ShellRoot {
     Launcher {}
     Notifications {}
     QuickPanel {}
+    Overview {}
     Cheatsheet {}
     PowerMenu {}
     WallpaperPicker {}

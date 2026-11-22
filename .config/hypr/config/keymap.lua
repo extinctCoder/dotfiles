@@ -30,6 +30,7 @@ bind("SUPER + d", "qs ipc call keys leader", "leader menu", "shell")
 bind("SUPER + slash", "qs ipc call keys cheatsheet", "keybind cheatsheet", "shell")
 bind("SUPER + n", "qs ipc call notifs clear", "clear notifications", "shell")
 bind("SUPER + a", "qs ipc call quick toggle", "quick settings + notifications", "shell")
+bind("SUPER + tab", "qs ipc call overview toggle", "window overview", "shell")
 bind("SUPER + w", "qs ipc call picker toggle", "wallpaper picker", "shell")
 
 -- windows (vim directions)
