@@ -46,3 +46,10 @@ output_path = "~/.config/lazygit/config.yml"
 [templates.qt6ct]
 input_path = "~/.config/matugen/templates/qt6ct.conf"
 output_path = "~/.config/qt6ct/colors/matugen.conf"
+
+# Helium's toolbar/tab colors (Chromium builds its palette from this one color).
+# The file is created by browser/install.sh; refresh only if Helium is running.
+[templates.helium]
+input_path = "~/.config/matugen/templates/helium-color.json"
+output_path = "/etc/helium/policies/managed/color.json"
+post_hook = "pgrep -x helcanium >/dev/null && helcanium --refresh-platform-policy --no-startup-window; true"
