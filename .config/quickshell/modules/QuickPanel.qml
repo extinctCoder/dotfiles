@@ -25,7 +25,16 @@ LazyLoader {
         Column {
             anchors.centerIn: parent
             Mono { anchors.horizontalCenter: parent.horizontalCenter; text: t.icon; color: t.on ? Colors.accentFg : Colors.accent; font.pixelSize: Style.fontLg }
-            Mono { anchors.horizontalCenter: parent.horizontalCenter; text: t.label; color: t.on ? Colors.accentFg : Colors.fg; font.pixelSize: Style.fontSm }
+            Mono {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: t.width - Style.pad * 2 // never wider than the tile
+                horizontalAlignment: Text.AlignHCenter
+                fontSizeMode: Text.HorizontalFit
+                minimumPixelSize: Math.round(Style.fontSm * 0.7)
+                text: t.label
+                color: t.on ? Colors.accentFg : Colors.fg
+                font.pixelSize: Style.fontSm
+            }
         }
         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: t.toggled() }
     }
@@ -74,7 +83,7 @@ LazyLoader {
                         onToggled: if (adapter) adapter.enabled = !adapter.enabled
                     }
                     Toggle { icon: Icons.night; label: "night light"; on: Sunset.on; onToggled: Sunset.toggle() }
-                    Toggle { icon: Icons.bellOff; label: "do not disturb"; on: Notifs.dnd; onToggled: Notifs.dnd = !Notifs.dnd }
+                    Toggle { icon: Icons.bellOff; label: "silent"; on: Notifs.dnd; onToggled: Notifs.dnd = !Notifs.dnd }
                     Toggle { icon: Icons.coffee; label: "stay awake"; on: Session.stayAwake; onToggled: Session.stayAwake = !Session.stayAwake }
                 }
 
