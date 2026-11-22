@@ -11,6 +11,10 @@ import qs.services
 //   eating   download in through the skin, upload out; charging feeds the heart
 //   hunger   low battery weakens the heart; fever (temperature) speeds it up
 //   presence away or locked: the heart weakens, the body loosens / collapses
+//   senses   mic or camera in use: the skin turns alert
+// Signals: CPU (total + busiest core), Intel GPU, RAM, swap, disk read and write,
+// network, CPU + NVMe temperature, battery, power draw, music, notifications,
+// workspaces, idle, lock, mic/camera.
 // Every motion comes from a real signal. Drawn on the GPU (shaders/), animated
 // only while `running` (the desktop decides: not when windows cover it).
 Item {
@@ -23,10 +27,17 @@ Item {
     readonly property real cpu: Math.max(0, Sys.cpu) / 100
     readonly property real ram: Sys.memPercent > 0 ? Sys.memPercent / 100 : 0
     readonly property real swap: Sys.swapTotal > 0 ? Math.max(0, Sys.swapUsed) / Sys.swapTotal : 0
-    readonly property real disk: rateNorm(Math.max(0, Disk.readRate) + Math.max(0, Disk.writeRate))
+    readonly property real diskRead: rateNorm(Disk.readRate)
+    readonly property real diskWrite: rateNorm(Disk.writeRate)
+    readonly property real disk: Math.max(diskRead, diskWrite)
+    readonly property real maxCore: Sys.cores.length ? Math.max(...Sys.cores) / 100 : cpu // one pegged core is strain even if the total is low
+    readonly property real gpu: Sensors.gpu > 0 ? Math.max(0, (Sensors.gpu - 0.12) / 0.88) : 0 // RC6 reads ~10% high at idle
+    readonly property real power: Battery.present && Battery.discharging ? Math.min(1, Battery.watts / 35) : 0 // draw on battery
+    readonly property bool watched: Privacy.active // mic or camera in use
     readonly property real rx: rateNorm(Sys.rxRate)
     readonly property real tx: rateNorm(Sys.txRate)
-    readonly property real heat: Sys.temp > 0 ? Math.min(1, Math.max(0, (Sys.temp - 40) / 50)) : 0 // 40 °C calm, 90 °C fever
+    readonly property real heat: Math.max(Sys.temp > 0 ? Math.min(1, Math.max(0, (Sys.temp - 40) / 50)) : 0, // CPU: 40 °C calm, 90 °C fever
+        Sensors.nvmeTemp > 0 ? Math.min(1, Math.max(0, (Sensors.nvmeTemp - 45) / 30)) : 0)              // NVMe: 45 °C calm, 75 °C fever
     readonly property bool charging: Battery.present && Battery.charging
     readonly property real hunger: !Battery.present || charging ? 0 : Battery.percent < 15 ? 0.5 : Battery.percent < 30 ? 0.2 : 0
     readonly property bool unwell: Battery.present && !charging && Battery.percent < 10
@@ -98,10 +109,12 @@ Item {
     function step(dt) {
         t += dt;
         // bands: load, chaos, motion
-        const targets = { compute: cpu, memory: Math.min(1, Math.max(0, (ram - 0.1) / 0.9) + swap * 0.6), storage: disk, network: Math.max(rx, tx) };
+        const targets = { compute: Math.max(cpu, gpu * 0.9), memory: Math.min(1, Math.max(0, (ram - 0.1) / 0.9) + swap * 0.6), storage: disk, network: Math.max(rx, tx) };
         const chaosT = {
-            compute: Math.pow(cpu, 1.6) + heat * 0.3, memory: Math.pow(Math.max(0, ram - 0.6) / 0.4, 1.5) + swap,
-            storage: Math.pow(disk, 1.5) + swap * 0.5, network: Math.pow(Math.max(rx, tx), 1.8)
+            compute: Math.max(Math.pow(cpu, 1.6), Math.pow(maxCore, 2) * 0.7, Math.pow(gpu, 1.6)) + heat * 0.3,
+            memory: Math.pow(Math.max(0, ram - 0.6) / 0.4, 1.5) + swap,
+            storage: Math.pow(diskWrite, 1.5) + Math.pow(diskRead, 1.5) * 0.5 + swap * 0.5, // writes strain more than reads
+            network: Math.pow(Math.max(rx, tx), 1.8)
         };
         const looseness = 1 + (1 - Math.min(1, strength)) * 0.5;
         for (const b of bands) {
@@ -121,7 +134,7 @@ Item {
         bandsChanged();
 
         // heart
-        const energy = Math.min(1, 0.55 * cpu + 0.15 * ram + 0.15 * disk + 0.15 * Math.max(rx, tx));
+        const energy = Math.min(1, 0.45 * cpu + 0.15 * gpu + 0.1 * ram + 0.1 * disk + 0.1 * Math.max(rx, tx) + 0.1 * power);
         awayFor = idle.isIdle ? awayFor + dt : 0;
         if (charging) food = Math.min(1, food + dt * 0.08); else food *= Math.pow(0.995, dt * 60);
         const target = (Session.locked ? 0.05 : idle.isIdle ? Math.max(0.25, 1 - awayFor / 18) : 1) * (1 - hunger) * (1 + food * 0.3);
@@ -171,9 +184,10 @@ Item {
         readonly property vector4d axN: core.axis(core.bands[3], core.bands[3].load > 0.005 ? core.bands[3].reach : 0)
         readonly property vector4d waveR: core.waveVec("r")
         readonly property vector4d waveA: core.waveVec("a")
-        readonly property vector4d skin: Qt.vector4d(52, 0.3 + 0.7 * Math.min(1, core.strength), core.unwell ? 2.5 : 0, core.heat)
+        readonly property vector4d skin: Qt.vector4d(52, (0.3 + 0.7 * Math.min(1, core.strength)) * (core.watched ? 1.35 : 1), core.unwell ? 2.5 : 0, core.heat)
         readonly property vector4d touch: Qt.vector4d(core.touchAmt, core.touchWidth, -Math.PI / 4, 0) // notifications live top right
-        readonly property vector4d colSkin: core.v4(core.mixc(core.mixc(core.primary, core.rgb(Colors.alert), core.heat * 0.8), core.album[1 % core.album.length], core.musicAmt * 0.4 * (0.5 + core.kick)))
+        // mic or camera in use: the skin turns alert (the senses are being used)
+        readonly property vector4d colSkin: core.v4(core.mixc(core.mixc(core.primary, core.rgb(Colors.alert), Math.max(core.heat * 0.8, core.watched ? 0.6 : 0)), core.album[1 % core.album.length], core.musicAmt * 0.4 * (0.5 + core.kick)))
         fragmentShader: "../shaders/membrane.frag.qsb"
     }
 
