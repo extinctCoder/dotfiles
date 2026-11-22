@@ -22,6 +22,10 @@ Singleton {
     }
     function clearHistory() { root.history = []; root.unread = 0; }
     function markRead() { root.unread = 0; }
+    function plain(s) {
+        return (s || "").replace(/<[^>]*>/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+            .replace(/&quot;/g, "\"").replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+    }
 
     // left click: run the default action, then close; right click: just close
     function activate(n, runDefault) {
@@ -46,7 +50,7 @@ Singleton {
         onNotification: n => {
             const critical = n.urgency === NotificationUrgency.Critical;
             root.history = [{
-                app: n.appName || "app", summary: n.summary, body: n.body,
+                app: n.appName || "app", summary: root.plain(n.summary), body: root.plain(n.body),
                 time: Qt.formatDateTime(new Date(), "HH:mm"), critical: critical
             }].concat(root.history).slice(0, 50);
             root.unread += 1;

@@ -7,8 +7,8 @@ import QtQuick
 Singleton {
     readonly property string wifi: String.fromCodePoint(0xf05a9)
     readonly property string wifiOff: String.fromCodePoint(0xf05aa)
-    readonly property string cpu: String.fromCodePoint(0xf061a)
-    readonly property string mem: String.fromCodePoint(0xf035b)
+    readonly property string cpu: String.fromCodePoint(0xf0ee0) // md-cpu_64_bit
+    readonly property string mem: String.fromCodePoint(0xefc5)  // fa-memory (RAM stick)
     readonly property string volume: String.fromCodePoint(0xf057e)
     readonly property string volumeOff: String.fromCodePoint(0xf0581)
     readonly property string battery: String.fromCodePoint(0xf0079)
