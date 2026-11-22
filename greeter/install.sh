@@ -16,7 +16,7 @@ sudo tee /etc/greetd/config.toml >/dev/null <<'TOML'
 vt = 1
 
 [default_session]
-command = "start-hyprland -- --config /etc/greetd/hyprland.lua"
+command = "start-hyprland -- --config /etc/greetd/hyprland.lua > /dev/null 2>&1"
 user = "greeter"
 TOML
 

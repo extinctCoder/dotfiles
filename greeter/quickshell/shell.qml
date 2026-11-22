@@ -53,7 +53,11 @@ ShellRoot {
         function onReadyToLaunch() {
             const d = root.session.desktop;
             root.status = "[ok] starting " + root.session.name;
-            Greetd.launch(["sh", "-c", root.session.exec],
+            // greetd runs sessions as one shell line: "exec " + the list joined with
+            // spaces. So pass ONE string (no "sh -c" wrapper, which breaks once the
+            // command has spaces). Output goes to /dev/null so nothing prints on the
+            // console that flashes between the login screen and the desktop.
+            Greetd.launch([root.session.exec + " > /dev/null 2>&1"],
                 ["XDG_SESSION_TYPE=wayland", "XDG_CURRENT_DESKTOP=" + d, "XDG_SESSION_DESKTOP=" + d]);
         }
         function onError(error) {
