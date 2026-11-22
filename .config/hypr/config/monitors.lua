@@ -3,7 +3,7 @@
 -- Too small? Try "1.25". Run `hyprctl monitors` to see names and modes.
 hl.monitor({
     output   = "eDP-1",
-    mode     = "1920x1080@60",
+    mode     = "preferred", -- the panel's native mode, same as the login screen: no mode switch (flicker) at login
     position = "auto",
     scale    = "1",
 })
