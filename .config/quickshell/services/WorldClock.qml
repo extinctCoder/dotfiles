@@ -13,7 +13,8 @@ Singleton {
         { name: "casablanca", tz: "Africa/Casablanca" },
         { name: "bangkok", tz: "Asia/Bangkok" }
     ]
-    property var times: [] // [{ name, time: "23:21", diff: "-11h" }]
+    property var times: [] // [{ name, time: "23:21", diff: "-11h", diffMin, hour }]
+    property real localHour: -1 // e.g. 11.5 = 11:30, from the same `date` call
 
     function minutes(z) { // "+0600" -> 360
         const s = z[0] === "-" ? -1 : 1;
@@ -35,8 +36,11 @@ Singleton {
                 const l = text.trim().split("\n").map(s => s.split(" "));
                 if (l.length !== root.zones.length + 1) return;
                 const local = root.minutes(l[0][1]);
+                root.localHour = Number(l[0][0].slice(0, 2)) + Number(l[0][0].slice(3, 5)) / 60;
                 root.times = root.zones.map((z, i) => ({
-                    name: z.name, time: l[i + 1][0], diff: root.diffText(root.minutes(l[i + 1][1]) - local)
+                    name: z.name, time: l[i + 1][0], diff: root.diffText(root.minutes(l[i + 1][1]) - local),
+                    diffMin: root.minutes(l[i + 1][1]) - local,
+                    hour: Number(l[i + 1][0].slice(0, 2)) + Number(l[i + 1][0].slice(3, 5)) / 60
                 }));
             }
         }

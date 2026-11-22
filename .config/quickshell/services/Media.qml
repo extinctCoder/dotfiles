@@ -10,6 +10,10 @@ Singleton {
     readonly property bool active: player !== null
     readonly property string title: player?.trackTitle ?? ""
     readonly property string artist: player?.trackArtist ?? ""
+    readonly property string album: player?.trackAlbum ?? ""
+    readonly property string artUrl: player?.trackArtUrl ?? ""
+    readonly property real position: player?.position ?? 0
+    readonly property real length: player?.length ?? 0
     readonly property real progress: player && player.length > 0 ? Math.min(1, player.position / player.length) : 0
 
     function toggle() { if (player) player.togglePlaying(); }
@@ -19,7 +23,7 @@ Singleton {
     // Mpris position is not live; poke it once a second while playing
     Timer {
         running: root.active
-        interval: 1000
+        interval: 500
         repeat: true
         onTriggered: root.player.positionChanged()
     }

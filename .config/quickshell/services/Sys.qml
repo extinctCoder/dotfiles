@@ -17,6 +17,9 @@ Singleton {
     property real rxRate: -1         // bytes per second, all interfaces except lo
     property real txRate: -1
     property real temp: -1           // °C, CPU package
+    property var rxHistory: []       // last 60 samples, bytes per second
+    property var txHistory: []
+    property real uptime: -1         // seconds since boot
     readonly property real memPercent: memTotal > 0 ? memUsed / memTotal * 100 : -1
 
     property var prevCpu: null
@@ -30,6 +33,11 @@ Singleton {
         if (b >= 1048576) return (b / 1048576).toFixed(1) + "M";
         if (b >= 1024) return Math.round(b / 1024) + "K";
         return Math.round(b) + "B";
+    }
+    function duration(s) {
+        if (s < 0) return "--";
+        const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+        return (d ? d + "d " : "") + (d || h ? h + "h " : "") + m + "m";
     }
     function gib(b) {
         if (b < 0) return "--";
@@ -49,7 +57,7 @@ Singleton {
 
     Process {
         id: sample
-        command: ["sh", "-c", 'cat /proc/stat /proc/meminfo /proc/net/dev; [ -n "$1" ] && echo "TEMP $(cat "$1" 2>/dev/null)"',
+        command: ["sh", "-c", 'cat /proc/stat /proc/meminfo /proc/net/dev; echo "UP $(cut -d " " -f 1 /proc/uptime)"; [ -n "$1" ] && echo "TEMP $(cat "$1" 2>/dev/null)"',
             "sh", root.tempFile]
         stdout: StdioCollector { onStreamFinished: root.parse(text) }
     }
@@ -76,6 +84,8 @@ Singleton {
             if (m && m[1] !== "lo") { rx += Number(m[2]); tx += Number(m[3]); continue; }
             m = line.match(/^TEMP (\d+)/);
             if (m) t = Number(m[1]) / 1000;
+            m = line.match(/^UP ([\d.]+)/);
+            if (m) root.uptime = Number(m[1]);
         }
         if (root.prevCpu && root.prevCpu.length === cpus.length) {
             const usage = cpus.map((c, i) => {
@@ -97,6 +107,8 @@ Singleton {
         if (root.prevNet && now > root.prevTime) {
             root.rxRate = Math.max(0, (rx - root.prevNet.rx) / (now - root.prevTime));
             root.txRate = Math.max(0, (tx - root.prevNet.tx) / (now - root.prevTime));
+            root.rxHistory = root.rxHistory.concat([root.rxRate]).slice(-60);
+            root.txHistory = root.txHistory.concat([root.txRate]).slice(-60);
         }
         root.prevNet = { rx: rx, tx: tx };
         root.prevTime = now;
