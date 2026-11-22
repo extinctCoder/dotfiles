@@ -12,6 +12,30 @@ Singleton {
     function toggle(name) { open = (open === name) ? "" : name; }
     function close() { open = ""; }
 
+    // Show the keybind cheatsheet once per login (false = never).
+    // PersistentProperties survives shell reloads (every wallpaper change), and
+    // onLoaded runs after its value is restored, so this fires only on a fresh start.
+    readonly property bool cheatsheetOnLogin: true
+
+    PersistentProperties {
+        id: persist
+        reloadableId: "panelsState"
+        property bool welcomed: false
+
+        onLoaded: {
+            if (root.cheatsheetOnLogin && !welcomed) {
+                welcomed = true;
+                welcome.start();
+            }
+        }
+    }
+
+    Timer {
+        id: welcome
+        interval: 1500 // let the wallpaper and bar draw first
+        onTriggered: if (root.open === "") root.open = "sheet"
+    }
+
     IpcHandler {
         target: "launcher"
         function toggle(): void { root.toggle("apps"); }
