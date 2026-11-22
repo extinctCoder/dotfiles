@@ -101,9 +101,20 @@ Item {
         function onIsIdleChanged() { if (!idle.isIdle) core.pulse(2.0); }
     }
 
-    FrameAnimation {
+    // ~30 updates/s. A Timer, not FrameAnimation: a running FrameAnimation keeps
+    // the whole desktop window redrawing at full refresh rate even when only every
+    // other frame changes (measured: 92 vs 32 frames drawn per second).
+    property real lastTick: 0
+    Timer {
+        interval: 33
+        repeat: true
         running: core.running && core.visible
-        onTriggered: if (currentFrame % 2 === 0) core.step(Math.min(0.1, frameTime * 2)) // 30 updates/s is plenty
+        onRunningChanged: core.lastTick = Date.now()
+        onTriggered: {
+            const now = Date.now();
+            core.step(Math.min(0.1, (now - core.lastTick) / 1000));
+            core.lastTick = now;
+        }
     }
 
     function step(dt) {
