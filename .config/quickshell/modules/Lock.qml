@@ -63,6 +63,7 @@ Scope {
 
     WlSessionLock {
         id: sessionLock
+        onLockedChanged: Session.locked = locked
         locked: false
 
         WlSessionLockSurface {

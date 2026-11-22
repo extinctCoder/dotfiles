@@ -1,7 +1,7 @@
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Hyprland
 import QtQuick
-import QtQuick.Effects
 import QtQuick.Layouts
 import qs.theme
 import qs.services
@@ -25,74 +25,35 @@ Variants {
         readonly property real unit: Math.min(width, height) / 100 // layout unit
         component Label: Mono { color: Colors.fgMuted; font.pixelSize: Style.fontSm }
 
-        // ---------------- center: radial visualizer clock + lyrics ----------------
-        Item {
-            id: clock
-            readonly property real ring: win.unit * 17   // inner radius of the bars
-            readonly property real reach: win.unit * 6    // longest bar
-            width: (ring + reach) * 2
+        // ---------------- center: the living core, clock, lyrics ----------------
+        // The core animates only while this desktop is actually visible: Hyprland
+        // keeps sending frames to covered surfaces, so it pauses itself when the
+        // visible workspace has windows, or the screen is locked.
+        readonly property var hyprMonitor: Hyprland.monitorFor(win.screen)
+        readonly property bool covered: (hyprMonitor?.activeWorkspace?.toplevels?.values?.length ?? 0) > 0
+
+        LivingCore {
+            id: core
+            width: win.unit * 56
             height: width
-            anchors { horizontalCenter: parent.horizontalCenter; verticalCenter: parent.verticalCenter; verticalCenterOffset: -win.unit * 4 }
-
-            // the album cover, heavily blurred and faint, inside the ring
-            Image {
-                id: art
-                anchors.centerIn: parent
-                width: clock.ring * 2; height: width
-                source: Media.artUrl
-                fillMode: Image.PreserveAspectCrop
-                visible: false
-                asynchronous: true
-            }
-            Rectangle { id: artMask; anchors.fill: art; radius: width / 2; visible: false; layer.enabled: true }
-            MultiEffect {
-                anchors.fill: art
-                source: art
-                visible: Media.active && art.status === Image.Ready
-                opacity: 0.18
-                blurEnabled: true
-                blur: 1.0
-                blurMax: 64
-                maskEnabled: true
-                maskSource: artMask
-                maskThresholdMin: 0.5
-                maskSpreadAtMin: 1.0
-            }
-
-            Repeater {
-                model: 72
-                Item {
-                    required property int index
-                    readonly property real v: Visualizer.bars[index] ?? 0
-                    anchors.centerIn: parent
-                    width: 4
-                    height: (clock.ring + clock.reach) * 2
-                    rotation: index * 5
-                    Rectangle {
-                        anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.verticalCenter; bottomMargin: clock.ring }
-                        width: 3
-                        height: Math.max(2, parent.v * clock.reach)
-                        color: Colors.accent
-                        opacity: parent.v > 0 ? 0.85 : 0.2 // still ring when nothing plays
-                    }
-                }
-            }
-
-            Column {
-                anchors.centerIn: parent
-                Mono {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: Clock.format("HH:mm")
-                    color: Colors.accent
-                    font.pixelSize: win.unit * 9
-                    font.letterSpacing: -win.unit * 0.3
-                }
-                Label { anchors.horizontalCenter: parent.horizontalCenter; text: Clock.format("dddd dd MMMM").toLowerCase(); font.pixelSize: Style.fontMd }
-            }
+            anchors { horizontalCenter: parent.horizontalCenter; verticalCenter: parent.verticalCenter; verticalCenterOffset: -win.unit * 8 }
+            running: !win.covered && !Session.locked
         }
 
         Column {
-            anchors { horizontalCenter: clock.horizontalCenter; top: clock.bottom; topMargin: win.unit * 2 }
+            id: clock
+            anchors { horizontalCenter: core.horizontalCenter; top: core.bottom; topMargin: -win.unit * 4 }
+            Mono {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: Clock.format("HH:mm")
+                color: Colors.fg
+                font.pixelSize: win.unit * 4.5
+            }
+            Label { anchors.horizontalCenter: parent.horizontalCenter; text: Clock.format("dddd dd MMMM").toLowerCase(); font.pixelSize: Style.fontMd }
+        }
+
+        Column {
+            anchors { horizontalCenter: clock.horizontalCenter; top: clock.bottom; topMargin: win.unit * 1.5 }
             width: win.width * 0.4
             spacing: Style.gap
             visible: Media.active

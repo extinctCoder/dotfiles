@@ -10,6 +10,8 @@ Singleton {
     readonly property color fgMuted: "{{colors.on_surface_variant.default.hex}}"
     readonly property color accent: "{{colors.primary.default.hex}}"
     readonly property color accentFg: "{{colors.on_primary.default.hex}}"
+    readonly property color secondary: "{{colors.secondary.default.hex}}"
+    readonly property color tertiary: "{{colors.tertiary.default.hex}}"
     readonly property color border: "{{colors.outline_variant.default.hex}}"
     readonly property color alert: "{{colors.error.default.hex}}"
     readonly property color ok: "{{colors.green.default.hex}}"

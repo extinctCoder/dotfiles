@@ -7,6 +7,7 @@ import QtQuick
 Singleton {
     id: root
     property alias stayAwake: persist.stayAwake
+    property bool locked: false // set by the lock screen
 
     PersistentProperties {
         id: persist
