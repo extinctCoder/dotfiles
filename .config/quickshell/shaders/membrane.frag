@@ -19,6 +19,7 @@ layout(std140, binding = 0) uniform buf {
     vec4 skin;       // x minimum radius, y brightness, z tremble, w fever
     vec4 touch;      // x amount, y width, z angle
     vec4 colSkin;
+    vec4 colLine2;   // the theme's border color
 };
 float reach(vec4 ax, vec2 d) {
     if (ax.w <= 0.0) return 0.0;
@@ -40,8 +41,9 @@ void main() {
     R -= touch.x * 26.0 * exp(-(da * da) / (2.0 * touch.y * touch.y));
     R += skin.z * (sin(th * 13.0 + time * 25.0) + sin(th * 7.0 - time * 31.0));
     float d1 = abs(r - R) * unit, d2 = abs(r - (R + 7.0)) * unit;
-    float line = (1.0 - smoothstep(0.2, 1.2, d1)) * 0.38 + (1.0 - smoothstep(0.2, 1.0, d2)) * 0.14;
-    float fill = (1.0 - smoothstep(R - 1.0, R + 0.5, r)) * (0.03 + skin.w * 0.05);
-    float a = (line + fill) * skin.y;
-    fragColor = vec4(colSkin.rgb * a, a) * qt_Opacity;
+    float a1 = (1.0 - smoothstep(0.6, 1.4, d1)) * 0.85 * skin.y;            // ~2 px solid line
+    float a2 = (1.0 - smoothstep(0.3, 1.0, d2)) * 0.6 * skin.y;             // thin border-colored echo
+    float fill = (1.0 - smoothstep(R - 1.0, R + 0.5, r)) * (0.02 + skin.w * 0.05) * skin.y;
+    vec3 c = colSkin.rgb * (a1 + fill) + colLine2.rgb * a2;
+    fragColor = vec4(c, a1 + a2 + fill) * qt_Opacity;
 }

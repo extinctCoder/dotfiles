@@ -35,10 +35,8 @@ layout(std140, binding = 0) uniform buf {
 
 void main() {
     if (fract(vCol * 0.5) > 0.499) discard;          // a bridge cell, not a particle
-    // round dot, stretched into a capsule along its motion
-    vec2 q = vec2(vLocal.x * vRatio, vLocal.y);
-    float d = length(vec2(max(abs(q.x) - (vRatio - 1.0), 0.0), q.y));
-    float a = 1.0 - smoothstep(0.55, 1.0, d);
-    if (a <= 0.0) discard;
-    fragColor = vColor * a * qt_Opacity;
+    // a flat square pixel (like the desktop's other graphics), stretched into a
+    // straight bar along its motion; only the trailing end fades
+    float tail = vRatio > 1.0 ? smoothstep(-1.0, 0.2, vLocal.x) : 1.0;
+    fragColor = vColor * mix(0.35, 1.0, tail) * qt_Opacity;
 }

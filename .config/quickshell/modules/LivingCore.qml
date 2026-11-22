@@ -20,7 +20,7 @@ import qs.services
 Item {
     id: core
     property bool running: true
-    readonly property real unit: Math.min(width, height) / 560 // designed on a 560 square
+    readonly property real unit: Math.min(width, height) / 430 // designed on a 560 square, drawn ~30% larger
 
     // ---------------- live signals, 0..1 ----------------
     function rateNorm(b) { return b > 0 ? Math.min(1, Math.log10(b / 1e4 + 1) / 4) : 0; } // 10 kB/s .. 100 MB/s
@@ -160,9 +160,12 @@ Item {
     function rgb(c) { return [c.r, c.g, c.b]; }
     function mixc(a, b, f) { return [0, 1, 2].map(i => a[i] + (b[i] - a[i]) * f); }
     function v4(c) { return Qt.vector4d(c[0], c[1], c[2], 1); }
+    // one accent family, like the other desktop widgets: bands are shades of the
+    // accent (toward the text color), the heart is the brightest
     readonly property var primary: rgb(Colors.accent)
-    readonly property var secondary: rgb(Colors.secondary !== undefined ? Colors.secondary : Colors.accent)
-    readonly property var tertiary: rgb(Colors.tertiary !== undefined ? Colors.tertiary : Colors.accent)
+    readonly property var shadeLight: mixc(primary, rgb(Colors.fg), 0.35)
+    readonly property var shadeMid: mixc(primary, rgb(Colors.fg), 0.15)
+    readonly property var shadeDim: mixc(primary, rgb(Colors.fgMuted), 0.45)
     readonly property var album: Album.colors.length ? Album.colors.map(rgb) : [primary]
     function bandColor(base, i) {
         let c = mixc(base, album[i % album.length], musicAmt * (0.45 + 0.35 * kick));
@@ -187,6 +190,7 @@ Item {
         readonly property vector4d skin: Qt.vector4d(52, (0.3 + 0.7 * Math.min(1, core.strength)) * (core.watched ? 1.35 : 1), core.unwell ? 2.5 : 0, core.heat)
         readonly property vector4d touch: Qt.vector4d(core.touchAmt, core.touchWidth, -Math.PI / 4, 0) // notifications live top right
         // mic or camera in use: the skin turns alert (the senses are being used)
+        readonly property vector4d colLine2: core.v4(core.rgb(Colors.border))
         readonly property vector4d colSkin: core.v4(core.mixc(core.mixc(core.primary, core.rgb(Colors.alert), Math.max(core.heat * 0.8, core.watched ? 0.6 : 0)), core.album[1 % core.album.length], core.musicAmt * 0.4 * (0.5 + core.kick)))
         fragmentShader: "../shaders/membrane.frag.qsb"
     }
@@ -212,11 +216,11 @@ Item {
         readonly property vector4d misc: Qt.vector4d((9 + core.cpu * 5) * (0.6 + 0.4 * Math.min(1, core.strength)) * (1 + core.glow * 0.35) * (1 - core.lock * 0.4) * (1 + core.food * 0.4),
             30, Math.max(...core.bands.map(b => b.reach)) + 16, core.heartPhase)
         readonly property vector4d colC: core.bandColor(core.primary, 0)
-        readonly property vector4d colM: core.bandColor(core.tertiary, 1)
-        readonly property vector4d colS: core.bandColor(core.secondary, 2)
-        readonly property vector4d colN: core.bandColor(core.mixc(core.primary, core.tertiary, 0.5), 3)
-        readonly property vector4d colHeart: core.v4(core.mixc(core.mixc(core.rgb(Colors.fg), core.rgb(Colors.ok), Math.min(1, core.food) * 0.6), core.album[0], core.musicAmt * 0.3))
-        readonly property vector4d colIn: core.v4(core.mixc(core.primary, [1, 1, 1], 0.3))
+        readonly property vector4d colM: core.bandColor(core.shadeLight, 1)
+        readonly property vector4d colS: core.bandColor(core.shadeDim, 2)
+        readonly property vector4d colN: core.bandColor(core.shadeMid, 3)
+        readonly property vector4d colHeart: core.v4(core.mixc(core.mixc(core.mixc(core.primary, [1, 1, 1], 0.35), core.rgb(Colors.ok), Math.min(1, core.food) * 0.6), core.album[0], core.musicAmt * 0.3))
+        readonly property vector4d colIn: core.v4(core.shadeLight)
         readonly property vector4d colFood: core.v4(core.rgb(Colors.ok))
         vertexShader: "../shaders/core.vert.qsb"
         fragmentShader: "../shaders/core.frag.qsb"
