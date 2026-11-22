@@ -65,6 +65,9 @@ Item {
     property real heartPhase: 0
     property real awayFor: 0
     property real musicAmt: 0
+    property real midLevel: 0      // live music, smoothed
+    property real highLevel: 0
+    property real daylight: 1      // 0.75 at night .. 1 by day (sunrise/sunset)
     property real kick: 0
 
     // ---------------- vector helpers ----------------
@@ -149,6 +152,11 @@ Item {
             network: Math.pow(Math.max(rx, tx), 1.8)
         };
         energy = Math.min(1, 0.45 * cpu + 0.15 * gpu + 0.1 * ram + 0.1 * disk + 0.1 * Math.max(rx, tx) + 0.1 * power);
+        // day and night, like the sun arc: full by day, 75% at night, an hour of twilight each side
+        const mins = s => s && s.length >= 5 ? Number(s.slice(0, 2)) * 60 + Number(s.slice(3, 5)) : -1;
+        const rise = mins(Weather.sunrise), set = mins(Weather.sunset), d = new Date(), now = d.getHours() * 60 + d.getMinutes();
+        const clamp = x => Math.max(0, Math.min(1, x));
+        daylight = rise < 0 || set < 0 ? 1 : 0.75 + 0.25 * clamp((now - rise + 30) / 60) * clamp((set + 30 - now) / 60);
     }
 
     function step(dt) {
@@ -177,6 +185,8 @@ Item {
         strength += (target - strength) * ease(2.4, dt);
         lock += ((Session.locked ? 1 : 0) - lock) * ease(3, dt);
         musicAmt += ((music ? 1 : 0) - musicAmt) * ease(1.8, dt);
+        midLevel += ((music ? Visualizer.mid : 0) - midLevel) * ease(8, dt);
+        highLevel += ((music ? Visualizer.high : 0) - highLevel) * ease(10, dt);
         if (!music && t >= nextBeat && !Session.locked) { // own heartbeat; with music the beat comes from the bass
             pulse((0.5 + energy * 0.6) * Math.max(0.3, strength));
             let interval = (2.2 - energy * 1.5) * (1 - 0.35 * heat) / Math.max(0.3, strength);
@@ -208,7 +218,9 @@ Item {
             misc: Qt.vector4d((9 + cpu * 5) * (0.6 + 0.4 * Math.min(1, strength)) * (1 + glow * 0.35) * (1 - lock * 0.4) * (1 + food * 0.4),
                 30, Math.max(B[0].reach, B[1].reach, B[2].reach, B[3].reach) + 16, heartPhase),
             skin: Qt.vector4d(52, (0.3 + 0.7 * Math.min(1, strength)) * (watched ? 1.35 : 1), unwell ? 2.5 : 0, heat),
-            touch: Qt.vector4d(touchAmt, touchWidth, -Math.PI / 4, 0) // notifications live top right
+            touch: Qt.vector4d(touchAmt, touchWidth, -Math.PI / 4, 0), // notifications live top right
+            audio: Qt.vector4d(midLevel, highLevel, glow * Math.min(1, strength), 0),
+            pores: Qt.vector4d(rx, tx, Math.max(B[0].reach, B[1].reach, B[2].reach, B[3].reach) + 16, 0)
         };
     }
 
@@ -249,6 +261,9 @@ Item {
         readonly property vector4d touch: core.u.touch
         readonly property vector4d colSkin: core.pal.skin
         readonly property vector4d colLine2: core.pal.line2
+        readonly property vector4d audio: core.u.audio
+        readonly property vector4d pores: core.u.pores
+        opacity: core.daylight
         fragmentShader: "../shaders/membrane.frag.qsb"
     }
 
@@ -278,6 +293,7 @@ Item {
         readonly property vector4d colHeart: core.pal.heart
         readonly property vector4d colIn: core.pal.specks
         readonly property vector4d colFood: core.pal.food
+        opacity: core.daylight
         vertexShader: "../shaders/core.vert.qsb"
         fragmentShader: "../shaders/core.frag.qsb"
     }

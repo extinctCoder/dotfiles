@@ -94,6 +94,7 @@ void main() {
                 if (d < 14.0) { float push = (1.0 - d / 14.0) * waveA[j]; rad += push * 6.0; glow = max(glow, push); }
             }
             rad *= 1.0 - life.y * 0.85;
+            rad *= 1.0 - life.w * 0.08 * min(1.0, strength); // each heartbeat contracts the body, then it releases
             vec3 p3 = (u * cos(ph) + w * sin(ph)) * rad;
             float persp = 1.0 + p3.z / 600.0;
             pos = center + p3.xy * persp * unit;
