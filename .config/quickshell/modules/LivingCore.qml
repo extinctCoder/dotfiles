@@ -101,36 +101,63 @@ Item {
         function onIsIdleChanged() { if (!idle.isIdle) core.pulse(2.0); }
     }
 
-    // ~30 updates/s. A Timer, not FrameAnimation: a running FrameAnimation keeps
-    // the whole desktop window redrawing at full refresh rate even when only every
-    // other frame changes (measured: 92 vs 32 frames drawn per second).
+    // ---------------- timing ----------------
+    // Data arrives every ~2 s, like the desktop's graphs: targets are recomputed then.
+    // Colors update 4 times a second (music and fever blend smoothly enough).
+    // Motion runs at 15 frames/s and only advances a few numbers; the GPU places
+    // every particle. The desktop gives the core its own small window, so a motion
+    // frame redraws only the core, not every widget.
     property real lastTick: 0
+    property var targets: ({ compute: 0, memory: 0, storage: 0, network: 0 })
+    property var chaosTargets: ({ compute: 0, memory: 0, storage: 0, network: 0 })
+    property real energy: 0
+    property var u: ({})   // the shaders' inputs, built once per motion frame
+    property var pal: ({}) // colors
+
+    Component.onCompleted: { sample(); paint(); step(0); }
+
     Timer {
-        interval: 33
+        interval: 2000
         repeat: true
         running: core.running && core.visible
-        onRunningChanged: core.lastTick = Date.now()
+        onTriggered: core.sample()
+    }
+    Timer {
+        interval: 250
+        repeat: true
+        running: core.running && core.visible
+        onTriggered: core.paint()
+    }
+    Timer {
+        interval: 66
+        repeat: true
+        running: core.running && core.visible
+        onRunningChanged: { core.lastTick = Date.now(); if (running) { core.sample(); core.paint(); } }
         onTriggered: {
             const now = Date.now();
-            core.step(Math.min(0.1, (now - core.lastTick) / 1000));
+            core.step(Math.min(0.2, (now - core.lastTick) / 1000));
             core.lastTick = now;
         }
     }
 
-    function step(dt) {
-        t += dt;
-        // bands: load, chaos, motion
-        const targets = { compute: Math.max(cpu, gpu * 0.9), memory: Math.min(1, Math.max(0, (ram - 0.1) / 0.9) + swap * 0.6), storage: disk, network: Math.max(rx, tx) };
-        const chaosT = {
+    function sample() {
+        targets = { compute: Math.max(cpu, gpu * 0.9), memory: Math.min(1, Math.max(0, (ram - 0.1) / 0.9) + swap * 0.6), storage: disk, network: Math.max(rx, tx) };
+        chaosTargets = {
             compute: Math.max(Math.pow(cpu, 1.6), Math.pow(maxCore, 2) * 0.7, Math.pow(gpu, 1.6)) + heat * 0.3,
             memory: Math.pow(Math.max(0, ram - 0.6) / 0.4, 1.5) + swap,
             storage: Math.pow(diskWrite, 1.5) + Math.pow(diskRead, 1.5) * 0.5 + swap * 0.5, // writes strain more than reads
             network: Math.pow(Math.max(rx, tx), 1.8)
         };
+        energy = Math.min(1, 0.45 * cpu + 0.15 * gpu + 0.1 * ram + 0.1 * disk + 0.1 * Math.max(rx, tx) + 0.1 * power);
+    }
+
+    function step(dt) {
+        t += dt;
+        // bands: ease toward the sampled targets, orbit, roam the sphere
         const looseness = 1 + (1 - Math.min(1, strength)) * 0.5;
         for (const b of bands) {
             b.load += (targets[b.k] - b.load) * ease(3, dt);
-            b.chaos += (Math.min(1, chaosT[b.k] + heat * 0.15) - b.chaos) * ease(2.4, dt);
+            b.chaos += (Math.min(1, chaosTargets[b.k] + heat * 0.15) - b.chaos) * ease(2.4, dt);
             b.rate = 0.27 * (0.3 + b.load * 2.6);
             b.phase += dt * b.rate * Math.min(1.2, strength) * (1 + b.chaos * 0.4);
             if (b.load > 0.005) b.ax = norm(rotate(b.ax, b.pa, b.dir * 60 * dt * (0.002 + b.load * 0.02) * (1 + b.chaos * 0.8) * Math.min(1, strength)));
@@ -142,10 +169,8 @@ Item {
             const d = dot(b.ax, o.ax), near = Math.max(Math.abs(d) - 0.55, 0);
             if (near > 0) { const push = norm(cross(cross(o.ax, b.ax), b.ax)), sg = d > 0 ? 1 : -1; b.ax = norm(b.ax.map((x, i) => x - push[i] * near * 0.6 * dt * sg * (0.3 + b.load))); }
         }
-        bandsChanged();
 
         // heart
-        const energy = Math.min(1, 0.45 * cpu + 0.15 * gpu + 0.1 * ram + 0.1 * disk + 0.1 * Math.max(rx, tx) + 0.1 * power);
         awayFor = idle.isIdle ? awayFor + dt : 0;
         if (charging) food = Math.min(1, food + dt * 0.08); else food *= Math.pow(0.995, dt * 60);
         const target = (Session.locked ? 0.05 : idle.isIdle ? Math.max(0.25, 1 - awayFor / 18) : 1) * (1 - hunger) * (1 + food * 0.3);
@@ -165,44 +190,65 @@ Item {
         kick *= Math.pow(0.88, dt * 60);
         heartPhase += dt * 0.6 * (0.3 + energy) * Math.min(1, strength);
         waves = waves.map(w => ({ r: w.r + (3.2 + energy * 2) * 60 * dt, a: w.a * Math.pow(0.985, dt * 60) })).filter(w => w.r < 260 && w.a > 0.03);
+
+        // the shaders' inputs, built once
+        const B = bands, w = waves;
+        const ax = (b, v) => Qt.vector4d(b.ax[0], b.ax[1], b.ax[2], v);
+        const wv = key => Qt.vector4d(w[0]?.[key] ?? 0, w[1]?.[key] ?? 0, w[2]?.[key] ?? 0, w[3]?.[key] ?? 0);
+        const reach = b => b.load > 0.005 ? b.reach : 0;
+        u = {
+            axC: ax(B[0], B[0].load), axM: ax(B[1], B[1].load), axS: ax(B[2], B[2].load), axN: ax(B[3], B[3].load),
+            reachC: ax(B[0], reach(B[0])), reachM: ax(B[1], reach(B[1])), reachS: ax(B[2], reach(B[2])), reachN: ax(B[3], reach(B[3])),
+            chaos: Qt.vector4d(B[0].chaos, B[1].chaos, B[2].chaos, B[3].chaos),
+            phase: Qt.vector4d(B[0].phase, B[1].phase, B[2].phase, B[3].phase),
+            rate: Qt.vector4d(B[0].rate, B[1].rate, B[2].rate, B[3].rate),
+            waveR: wv("r"), waveA: wv("a"),
+            life: Qt.vector4d(strength, lock, heat, glow),
+            flow: Qt.vector4d(rx, tx, charging ? 1 : 0, food),
+            misc: Qt.vector4d((9 + cpu * 5) * (0.6 + 0.4 * Math.min(1, strength)) * (1 + glow * 0.35) * (1 - lock * 0.4) * (1 + food * 0.4),
+                30, Math.max(B[0].reach, B[1].reach, B[2].reach, B[3].reach) + 16, heartPhase),
+            skin: Qt.vector4d(52, (0.3 + 0.7 * Math.min(1, strength)) * (watched ? 1.35 : 1), unwell ? 2.5 : 0, heat),
+            touch: Qt.vector4d(touchAmt, touchWidth, -Math.PI / 4, 0) // notifications live top right
+        };
     }
 
-    // ---------------- colors: theme, fever, album ----------------
+    // ---------------- colors: one accent family, fever, album ----------------
     function rgb(c) { return [c.r, c.g, c.b]; }
     function mixc(a, b, f) { return [0, 1, 2].map(i => a[i] + (b[i] - a[i]) * f); }
     function v4(c) { return Qt.vector4d(c[0], c[1], c[2], 1); }
-    // one accent family, like the other desktop widgets: bands are shades of the
-    // accent (toward the text color), the heart is the brightest
-    readonly property var primary: rgb(Colors.accent)
-    readonly property var shadeLight: mixc(primary, rgb(Colors.fg), 0.35)
-    readonly property var shadeMid: mixc(primary, rgb(Colors.fg), 0.15)
-    readonly property var shadeDim: mixc(primary, rgb(Colors.fgMuted), 0.45)
-    readonly property var album: Album.colors.length ? Album.colors.map(rgb) : [primary]
-    function bandColor(base, i) {
-        let c = mixc(base, album[i % album.length], musicAmt * (0.45 + 0.35 * kick));
-        return v4(mixc(c, rgb(Colors.alert), heat * 0.65));
+    function paint() {
+        const primary = rgb(Colors.accent), fg = rgb(Colors.fg), alert = rgb(Colors.alert), ok = rgb(Colors.ok);
+        const album = Album.colors.length ? Album.colors.map(rgb) : [primary];
+        const band = (base, i) => v4(mixc(mixc(base, album[i % album.length], musicAmt * 0.6), alert, heat * 0.65));
+        pal = {
+            C: band(primary, 0),
+            M: band(mixc(primary, fg, 0.35), 1),
+            S: band(mixc(primary, rgb(Colors.fgMuted), 0.45), 2),
+            N: band(mixc(primary, fg, 0.15), 3),
+            heart: v4(mixc(mixc(mixc(primary, [1, 1, 1], 0.35), ok, Math.min(1, food) * 0.6), album[0], musicAmt * 0.3)),
+            specks: v4(mixc(primary, fg, 0.35)),
+            food: v4(ok),
+            skin: v4(mixc(mixc(primary, alert, Math.max(heat * 0.8, watched ? 0.6 : 0)), album[1 % album.length], musicAmt * 0.4)),
+            line2: v4(rgb(Colors.border))
+        };
     }
 
     // ---------------- the two shaders ----------------
-    function axis(b, w) { return Qt.vector4d(b.ax[0], b.ax[1], b.ax[2], w); }
-    function waveVec(key) { const w = waves; return Qt.vector4d(w[0]?.[key] ?? 0, w[1]?.[key] ?? 0, w[2]?.[key] ?? 0, w[3]?.[key] ?? 0); }
-
     ShaderEffect { // skin (behind the body)
         anchors.fill: parent
         readonly property real time: core.t
         readonly property real unit: core.unit
         readonly property size size: Qt.size(width, height)
-        readonly property vector4d axC: core.axis(core.bands[0], core.bands[0].load > 0.005 ? core.bands[0].reach : 0)
-        readonly property vector4d axM: core.axis(core.bands[1], core.bands[1].load > 0.005 ? core.bands[1].reach : 0)
-        readonly property vector4d axS: core.axis(core.bands[2], core.bands[2].load > 0.005 ? core.bands[2].reach : 0)
-        readonly property vector4d axN: core.axis(core.bands[3], core.bands[3].load > 0.005 ? core.bands[3].reach : 0)
-        readonly property vector4d waveR: core.waveVec("r")
-        readonly property vector4d waveA: core.waveVec("a")
-        readonly property vector4d skin: Qt.vector4d(52, (0.3 + 0.7 * Math.min(1, core.strength)) * (core.watched ? 1.35 : 1), core.unwell ? 2.5 : 0, core.heat)
-        readonly property vector4d touch: Qt.vector4d(core.touchAmt, core.touchWidth, -Math.PI / 4, 0) // notifications live top right
-        // mic or camera in use: the skin turns alert (the senses are being used)
-        readonly property vector4d colLine2: core.v4(core.rgb(Colors.border))
-        readonly property vector4d colSkin: core.v4(core.mixc(core.mixc(core.primary, core.rgb(Colors.alert), Math.max(core.heat * 0.8, core.watched ? 0.6 : 0)), core.album[1 % core.album.length], core.musicAmt * 0.4 * (0.5 + core.kick)))
+        readonly property vector4d axC: core.u.reachC
+        readonly property vector4d axM: core.u.reachM
+        readonly property vector4d axS: core.u.reachS
+        readonly property vector4d axN: core.u.reachN
+        readonly property vector4d waveR: core.u.waveR
+        readonly property vector4d waveA: core.u.waveA
+        readonly property vector4d skin: core.u.skin
+        readonly property vector4d touch: core.u.touch
+        readonly property vector4d colSkin: core.pal.skin
+        readonly property vector4d colLine2: core.pal.line2
         fragmentShader: "../shaders/membrane.frag.qsb"
     }
 
@@ -213,26 +259,25 @@ Item {
         readonly property real slots: 450
         readonly property real unit: core.unit
         readonly property point center: Qt.point(width / 2, height / 2)
-        readonly property vector4d axC: core.axis(core.bands[0], core.bands[0].load)
-        readonly property vector4d axM: core.axis(core.bands[1], core.bands[1].load)
-        readonly property vector4d axS: core.axis(core.bands[2], core.bands[2].load)
-        readonly property vector4d axN: core.axis(core.bands[3], core.bands[3].load)
-        readonly property vector4d chaos: Qt.vector4d(core.bands[0].chaos, core.bands[1].chaos, core.bands[2].chaos, core.bands[3].chaos)
-        readonly property vector4d phase: Qt.vector4d(core.bands[0].phase, core.bands[1].phase, core.bands[2].phase, core.bands[3].phase)
-        readonly property vector4d rate: Qt.vector4d(core.bands[0].rate, core.bands[1].rate, core.bands[2].rate, core.bands[3].rate)
-        readonly property vector4d waveR: core.waveVec("r")
-        readonly property vector4d waveA: core.waveVec("a")
-        readonly property vector4d life: Qt.vector4d(core.strength, core.lock, core.heat, core.glow)
-        readonly property vector4d flow: Qt.vector4d(core.rx, core.tx, core.charging ? 1 : 0, core.food)
-        readonly property vector4d misc: Qt.vector4d((9 + core.cpu * 5) * (0.6 + 0.4 * Math.min(1, core.strength)) * (1 + core.glow * 0.35) * (1 - core.lock * 0.4) * (1 + core.food * 0.4),
-            30, Math.max(...core.bands.map(b => b.reach)) + 16, core.heartPhase)
-        readonly property vector4d colC: core.bandColor(core.primary, 0)
-        readonly property vector4d colM: core.bandColor(core.shadeLight, 1)
-        readonly property vector4d colS: core.bandColor(core.shadeDim, 2)
-        readonly property vector4d colN: core.bandColor(core.shadeMid, 3)
-        readonly property vector4d colHeart: core.v4(core.mixc(core.mixc(core.mixc(core.primary, [1, 1, 1], 0.35), core.rgb(Colors.ok), Math.min(1, core.food) * 0.6), core.album[0], core.musicAmt * 0.3))
-        readonly property vector4d colIn: core.v4(core.shadeLight)
-        readonly property vector4d colFood: core.v4(core.rgb(Colors.ok))
+        readonly property vector4d axC: core.u.axC
+        readonly property vector4d axM: core.u.axM
+        readonly property vector4d axS: core.u.axS
+        readonly property vector4d axN: core.u.axN
+        readonly property vector4d chaos: core.u.chaos
+        readonly property vector4d phase: core.u.phase
+        readonly property vector4d rate: core.u.rate
+        readonly property vector4d waveR: core.u.waveR
+        readonly property vector4d waveA: core.u.waveA
+        readonly property vector4d life: core.u.life
+        readonly property vector4d flow: core.u.flow
+        readonly property vector4d misc: core.u.misc
+        readonly property vector4d colC: core.pal.C
+        readonly property vector4d colM: core.pal.M
+        readonly property vector4d colS: core.pal.S
+        readonly property vector4d colN: core.pal.N
+        readonly property vector4d colHeart: core.pal.heart
+        readonly property vector4d colIn: core.pal.specks
+        readonly property vector4d colFood: core.pal.food
         vertexShader: "../shaders/core.vert.qsb"
         fragmentShader: "../shaders/core.frag.qsb"
     }

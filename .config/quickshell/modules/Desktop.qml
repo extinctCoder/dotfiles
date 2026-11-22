@@ -11,10 +11,13 @@ import qs.services
 Variants {
     model: Quickshell.screens
 
+    Scope {
+    id: scr
+    required property var modelData
+
     PanelWindow {
         id: win
-        required property var modelData
-        screen: modelData
+        screen: scr.modelData
         anchors { top: true; bottom: true; left: true; right: true }
         exclusionMode: ExclusionMode.Ignore
         color: "transparent"
@@ -32,17 +35,14 @@ Variants {
         readonly property var hyprMonitor: Hyprland.monitorFor(win.screen)
         readonly property bool covered: (hyprMonitor?.activeWorkspace?.toplevels?.values?.length ?? 0) > 0
 
-        LivingCore {
-            id: core
-            width: win.unit * 56
-            height: width
-            anchors { horizontalCenter: parent.horizontalCenter; verticalCenter: parent.verticalCenter; verticalCenterOffset: -win.unit * 8 }
-            running: !win.covered && !Session.locked
-        }
+        // the core itself lives in its own small window (coreWin, below)
+        readonly property real coreSize: win.unit * 56
+        readonly property real coreTop: win.height / 2 - win.unit * 8 - coreSize / 2
 
         Column {
             id: clock
-            anchors { horizontalCenter: core.horizontalCenter; top: core.bottom; topMargin: -win.unit * 4 }
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: win.coreTop + win.coreSize - win.unit * 4
             Mono {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: Clock.format("HH:mm")
@@ -288,5 +288,28 @@ Variants {
                 font.pixelSize: Style.fontSm
             }
         }
+    }
+
+    // The living core in its own small window above the desktop widgets (same
+    // layer, declared later = on top): its motion frames redraw only this square,
+    // not the whole desktop.
+    PanelWindow {
+        id: coreWin
+        screen: scr.modelData
+        anchors.top: true // not anchored left/right: centered horizontally
+        margins.top: win.coreTop
+        implicitWidth: win.coreSize
+        implicitHeight: win.coreSize
+        exclusionMode: ExclusionMode.Ignore
+        color: "transparent"
+        mask: Region {} // click-through
+        WlrLayershell.layer: WlrLayer.Bottom
+        WlrLayershell.namespace: "quickshell-core"
+
+        LivingCore {
+            anchors.fill: parent
+            running: !win.covered && !Session.locked
+        }
+    }
     }
 }
