@@ -34,7 +34,24 @@ Singleton {
         + 'r=$(curl -sfG -A "$ua" --max-time 10 --data-urlencode "q=$5 $6" "$api/search") '
         + '&& printf "SEARCH %s\\n" "$r"'
 
-    onKeyChanged: { lines = []; if (key !== "") fetch.running = true; }
+    // Players announce a new track in pieces (browsers: title, then artist, then
+    // length), so wait until it settles, then look up once with complete info.
+    // A change during a lookup runs another one afterwards (its result is
+    // stale and dropped), instead of being lost.
+    property bool pending: false
+    property string fetchingKey: "" // the track the running lookup is for
+    onKeyChanged: { lines = []; settle.restart(); }
+    Component.onCompleted: settle.restart() // a song may already be playing (the shell reloads on every wallpaper change)
+    Timer {
+        id: settle
+        interval: 700
+        onTriggered: {
+            if (root.key === "") return;
+            if (fetch.running) { root.pending = true; return; }
+            root.fetchingKey = root.key;
+            fetch.running = true;
+        }
+    }
 
     function cleanTitle(t) {
         return (t || "")
@@ -74,9 +91,9 @@ Singleton {
         // printf, not echo: echo may turn the "\n" escapes inside the JSON into real line breaks
         command: ["sh", "-c", root.script, "sh", Media.artist, Media.title, Media.album, String(Math.round(Media.length)),
             root.clean.artist, root.clean.title]
+        onExited: if (root.pending) { root.pending = false; settle.restart(); }
         stdout: StdioCollector {
             onStreamFinished: {
-                const want = root.key;
                 try {
                     if (text.startsWith("GET ")) {
                         root.lines = root.parse(JSON.parse(text.slice(4)).syncedLyrics);
@@ -87,7 +104,7 @@ Singleton {
                         root.lines = hits.length && Math.abs(hits[0].duration - Media.length) <= tolerance ? root.parse(hits[0].syncedLyrics) : [];
                     }
                 } catch (e) { root.lines = []; }
-                if (want !== root.key) root.lines = []; // track changed meanwhile
+                if (root.fetchingKey !== root.key) root.lines = []; // track changed meanwhile (a new lookup follows)
             }
         }
     }
