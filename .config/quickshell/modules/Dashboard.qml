@@ -197,7 +197,7 @@ LazyLoader {
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 0
-                                Mono { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.active ? Media.title : "nothing playing"; color: Media.active ? Colors.fg : Colors.fgMuted }
+                                Mono { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.present ? Media.title : "nothing playing"; color: Media.present ? Colors.fg : Colors.fgMuted }
                                 Small { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.artist }
                             }
                         }
@@ -254,7 +254,7 @@ LazyLoader {
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: Style.gap
-                            Mono { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.active ? Media.title : "nothing playing"; font.pixelSize: Style.fontLg }
+                            Mono { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.present ? Media.title : "nothing playing"; font.pixelSize: Style.fontLg }
                             Small { Layout.fillWidth: true; elide: Text.ElideRight; text: [Media.artist, Media.album].filter(x => x).join(" · ") }
                             Small { text: Media.player ? Media.player.identity.toLowerCase() : "" }
                             // spectrum (cava), square bars

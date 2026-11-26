@@ -14,7 +14,7 @@ import QtQuick
 Singleton {
     id: root
     property var lines: []   // [{ t: seconds, text }]
-    readonly property string key: Media.active ? Media.artist + "|" + Media.title : ""
+    readonly property string key: Media.present ? Media.artist + "|" + Media.title : ""
     readonly property int index: {
         const p = Media.position;
         let i = -1;

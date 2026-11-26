@@ -111,7 +111,7 @@ PanelWindow {
             id: playing
             property bool shown: false
             timeout: 4000
-            visible: shown && Media.active
+            visible: shown && Media.present
             onTimedOut: shown = false
             Connections {
                 target: Media
