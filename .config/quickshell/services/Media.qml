@@ -28,6 +28,12 @@ Singleton {
     readonly property string artUrl: player?.trackArtUrl ?? ""
     readonly property real position: player?.position ?? 0
     readonly property real length: player?.length ?? 0
+    // what Lyrics recognized by ear (SongRec): { artist, title, album, cover } or null.
+    // shown*: what the dashboard and cards show, the real names when known
+    property var recognized: null
+    readonly property string shownTitle: recognized?.title || title
+    readonly property string shownArtist: recognized?.artist || artist
+    readonly property string cover: recognized?.cover || artUrl
     readonly property real progress: player && player.length > 0 ? Math.min(1, player.position / player.length) : 0
     function toggle() { if (player) player.togglePlaying(); }
     function next() { if (player) player.next(); }

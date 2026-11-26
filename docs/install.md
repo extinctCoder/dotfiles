@@ -24,6 +24,7 @@ What needs what:
 | Package | Used for |
 |---|---|
 | `cava` | the music spectrum and beats (living core, lyrics timing is separate) |
+| `songrec` | recognizing songs by ear when a video's title doesn't find lyrics (installed by `media/install.sh`) |
 | `pacman-contrib` | `checkupdates`: the pending-updates count on the desktop |
 | `fd` | file search in the launcher |
 | `sqlite` | Zen bookmarks and history in the launcher |

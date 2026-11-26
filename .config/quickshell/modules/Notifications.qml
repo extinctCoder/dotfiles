@@ -128,7 +128,7 @@ PanelWindow {
                     border { width: Style.border; color: Colors.border }
                     Image {
                         anchors { fill: parent; margins: Style.border }
-                        source: Media.artUrl
+                        source: Media.cover
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
                     }
@@ -137,8 +137,8 @@ PanelWindow {
                     Layout.fillWidth: true
                     spacing: 0
                     Mono { text: Icons.music + " now playing"; color: Colors.fgMuted; font.pixelSize: Style.fontSm }
-                    Mono { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.title }
-                    Mono { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.artist; color: Colors.fgMuted; font.pixelSize: Style.fontSm }
+                    Mono { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.shownTitle }
+                    Mono { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.shownArtist; color: Colors.fgMuted; font.pixelSize: Style.fontSm }
                 }
                 MonoButton { text: Icons.previous; color: Colors.accent; onClicked: Media.previous() }
                 MonoButton { text: Media.active ? Icons.pause : Icons.playIcon; color: Colors.accent; onClicked: Media.toggle() }

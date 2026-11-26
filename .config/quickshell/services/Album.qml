@@ -8,7 +8,7 @@ import QtQuick
 // are cached in ~/.cache/quickshell/art first.
 Singleton {
     id: root
-    readonly property string url: Media.active ? Media.artUrl : ""
+    readonly property string url: Media.active ? Media.cover : "" // the real album cover once recognized
     property string local: ""
     readonly property var colors: local !== "" ? quantizer.colors : []
     readonly property string cacheDir: Quickshell.env("HOME") + "/.cache/quickshell/art/"

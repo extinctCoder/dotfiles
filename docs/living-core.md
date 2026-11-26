@@ -70,6 +70,19 @@ mean + 0.8 standard deviations), at most one beat per 0.28 s. Tested through cav
 90–140 BPM tracks with deep and weak kicks; bass lines, hi-hats and sustained chords
 alone produce no rhythm. It syncs within a couple of seconds of a song starting.
 
+## Lyrics
+
+`services/Lyrics.qml` finds synced lyrics on LRCLIB. First with the player's own
+artist and title (cleaned of video extras like "(Official Video)" and channel
+names like "…VEVO"). When that finds nothing while the song plays, it identifies
+the song **by ear**: it records about 11 seconds of what the speakers play (the
+output's monitor, never the microphone) and asks Shazam through SongRec, then
+looks up the real artist, title and album. Only a fingerprint of the audio is
+sent, to Shazam's servers only. Each track is recognized once and remembered in
+`~/.cache/quickshell/lyrics-recognized.json`; the dashboard and cards then show
+the real names and album cover. Needs `songrec` (`media/install.sh`); without it,
+the quick lookup still works.
+
 ## Rendering and cost
 
 - All particles (450 slots: body, heart, specks) are placed by **one vertex shader**

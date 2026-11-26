@@ -192,13 +192,13 @@ LazyLoader {
                                 implicitWidth: Style.rowHeight * 2; implicitHeight: implicitWidth
                                 color: Colors.panel
                                 border { width: Style.border; color: Colors.border }
-                                Image { anchors { fill: parent; margins: Style.border } source: Media.artUrl; fillMode: Image.PreserveAspectCrop; asynchronous: true }
+                                Image { anchors { fill: parent; margins: Style.border } source: Media.cover; fillMode: Image.PreserveAspectCrop; asynchronous: true }
                             }
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 0
-                                Mono { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.present ? Media.title : "nothing playing"; color: Media.present ? Colors.fg : Colors.fgMuted }
-                                Small { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.artist }
+                                Mono { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.present ? Media.shownTitle : "nothing playing"; color: Media.present ? Colors.fg : Colors.fgMuted }
+                                Small { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.shownArtist }
                             }
                         }
                         Bar1 { value: Media.progress }
@@ -248,14 +248,14 @@ LazyLoader {
                             implicitWidth: 170; implicitHeight: 170
                             color: Colors.panel
                             border { width: Style.border; color: Colors.border }
-                            Image { anchors { fill: parent; margins: Style.border } source: Media.artUrl; fillMode: Image.PreserveAspectCrop; asynchronous: true }
-                            Mono { anchors.centerIn: parent; visible: Media.artUrl === ""; text: Icons.music; color: Colors.fgMuted; font.pixelSize: Style.fontXl }
+                            Image { anchors { fill: parent; margins: Style.border } source: Media.cover; fillMode: Image.PreserveAspectCrop; asynchronous: true }
+                            Mono { anchors.centerIn: parent; visible: Media.cover === ""; text: Icons.music; color: Colors.fgMuted; font.pixelSize: Style.fontXl }
                         }
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: Style.gap
-                            Mono { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.present ? Media.title : "nothing playing"; font.pixelSize: Style.fontLg }
-                            Small { Layout.fillWidth: true; elide: Text.ElideRight; text: [Media.artist, Media.album].filter(x => x).join(" · ") }
+                            Mono { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.present ? Media.shownTitle : "nothing playing"; font.pixelSize: Style.fontLg }
+                            Small { Layout.fillWidth: true; elide: Text.ElideRight; text: [Media.shownArtist, Media.recognized?.album || Media.album].filter(x => x).join(" · ") }
                             Small { text: Media.player ? Media.player.identity.toLowerCase() : "" }
                             // spectrum (cava), square bars
                             Row {
@@ -314,7 +314,8 @@ LazyLoader {
                         }
                     }
                     Tile {
-                        visible: Lyrics.lines.length > 0
+                        visible: Lyrics.lines.length > 0 || Lyrics.listening
+                        Small { visible: Lyrics.listening; Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; text: Icons.music + " identifying the song… (lyrics follow)" }
                         Small { Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight; text: Lyrics.previous }
                         Mono { Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.Wrap; text: Lyrics.current; color: Colors.accent }
                         Small { Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight; text: Lyrics.index + 1 < Lyrics.lines.length ? Lyrics.lines[Lyrics.index + 1].text : "" }

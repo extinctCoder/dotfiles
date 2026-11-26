@@ -1,12 +1,12 @@
 #!/bin/sh
-# One-time setup for YouTube in mpv:
+# One-time setup for YouTube in mpv (and lyrics by ear: songrec, a Shazam client):
 #   mpv + yt-dlp (best quality), mpv-mpris (island, lyrics, media keys),
 #   uosc (flat controls in your colors), SponsorBlock, ff2mpv (Zen -> mpv).
 # Some packages put their scripts where mpv loads them (/etc/mpv/scripts),
 # others in /usr/share/mpv; this asks pacman where each one went and links
 # only what mpv would not load on its own.
 set -e
-yay -S --needed mpv yt-dlp mpv-mpris mpv-uosc mpv-sponsorblock-minimal-git ff2mpv-native-messaging-host-git
+yay -S --needed mpv yt-dlp mpv-mpris mpv-uosc mpv-sponsorblock-minimal-git ff2mpv-native-messaging-host-git songrec
 
 conf="$HOME/.config/mpv"
 mkdir -p "$conf/scripts" "$conf/script-opts"

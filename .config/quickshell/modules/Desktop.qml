@@ -71,7 +71,7 @@ Variants {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
-                text: Media.title + (Media.artist ? " · " + Media.artist : "")
+                text: Media.shownTitle + (Media.shownArtist ? " · " + Media.shownArtist : "")
             }
         }
 
