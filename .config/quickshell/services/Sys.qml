@@ -20,6 +20,7 @@ Singleton {
     property var rxHistory: []       // last 60 samples, bytes per second
     property var txHistory: []
     property real uptime: -1         // seconds since boot
+    property string host: ""         // this machine's name (/etc/hostname)
     readonly property real memPercent: memTotal > 0 ? memUsed / memTotal * 100 : -1
 
     property var prevCpu: null
@@ -113,5 +114,11 @@ Singleton {
         root.prevNet = { rx: rx, tx: tx };
         root.prevTime = now;
         root.temp = t;
+    }
+
+    FileView {
+        path: "/etc/hostname"
+        printErrors: false
+        onLoaded: root.host = text().trim()
     }
 }

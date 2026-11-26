@@ -32,11 +32,13 @@ LazyLoader {
         MouseArea { anchors.fill: parent; onClicked: Panels.close() }
 
         Rectangle {
-            anchors.centerIn: parent
+            // flush under the right side of the bar (the power block opens it)
+            anchors { top: parent.top; right: parent.right; topMargin: Style.barHeight - Style.border }
             width: 320
             height: col.implicitHeight + Style.pad * 2
-            color: Colors.panel
-            border { width: Style.border; color: Colors.border }
+            color: Colors.raised
+            Rectangle { anchors { left: parent.left; top: parent.top; bottom: parent.bottom } width: Style.border; color: Colors.border }
+            Rectangle { anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: Style.border; color: Colors.border }
 
             MouseArea { anchors.fill: parent }
 
@@ -70,11 +72,12 @@ LazyLoader {
                 anchors { left: parent.left; right: parent.right; top: parent.top; margins: Style.pad }
                 spacing: 0
 
-                Mono {
-                    text: "power>"
-                    color: Colors.accent
-                    font.pixelSize: Style.fontLg
+                RowLayout {
+                    Layout.fillWidth: true
                     Layout.bottomMargin: Style.gap
+                    Mono { text: Quickshell.env("USER") + (Sys.host ? "@" + Sys.host : ""); Layout.fillWidth: true; elide: Text.ElideRight }
+                    Mono { text: "up " + Sys.duration(Sys.uptime); color: Colors.fgMuted; font.pixelSize: Style.fontSm }
+                    Mono { visible: Battery.present; text: Battery.percent + "%"; color: Battery.low ? Colors.alert : Colors.accent; font.pixelSize: Style.fontSm }
                 }
 
                 Repeater {
@@ -118,6 +121,12 @@ LazyLoader {
                     Layout.topMargin: Style.gap
                     color: Colors.alert
                     text: "[warn] " + (Power.actions.find(a => a.key === win.confirming)?.label ?? "") + "? [y/n]"
+                }
+                Mono {
+                    Layout.topMargin: Style.gap
+                    text: "letter or ↑↓ + enter · esc close"
+                    color: Colors.fgMuted
+                    font.pixelSize: Style.fontSm
                 }
             }
         }

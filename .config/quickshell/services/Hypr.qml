@@ -9,6 +9,9 @@ Singleton {
     readonly property var workspaces: Hyprland.workspaces
     readonly property int focusedId: Hyprland.focusedWorkspace?.id ?? -1
     readonly property string windowTitle: ToplevelManager.activeToplevel?.title ?? ""
+    readonly property string windowApp: ToplevelManager.activeToplevel?.appId ?? ""
+    // the scratchpad (special workspace) has windows
+    readonly property bool scratchpadUsed: Array.from(Hyprland.workspaces.values).some(w => w.name.startsWith("special:") && w.toplevels.values.length > 0)
 
     // Hyprland 0.55+ with a Lua config: dispatch takes a Lua dispatcher
     function focusWorkspace(id) { Hyprland.dispatch("hl.dsp.focus({ workspace = " + id + " })"); }

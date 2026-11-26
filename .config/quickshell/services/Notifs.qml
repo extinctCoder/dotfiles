@@ -15,7 +15,7 @@ Singleton {
     property alias history: persist.history // newest first: { app, summary, body, time, critical }
     property alias unread: persist.unread
 
-    signal notified(string text, bool critical) // the island shows a preview
+    signal notified(string text, bool critical) // the living core is touched by it
 
     function clear() {
         for (const n of Array.from(server.trackedNotifications.values)) n.dismiss();
@@ -47,6 +47,8 @@ Singleton {
         keepOnReload: true
         bodySupported: true
         actionsSupported: true
+        inlineReplySupported: true
+        imageSupported: true
         onNotification: n => {
             const critical = n.urgency === NotificationUrgency.Critical;
             root.history = [{

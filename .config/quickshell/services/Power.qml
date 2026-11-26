@@ -22,6 +22,7 @@ Singleton {
         { key: "o", label: "log out",   confirm: false, cmd: ["hyprctl", "dispatch", "hl.dsp.exit()"] },
         { key: "s", label: "sleep",     confirm: false, cmd: ["systemctl", "suspend"] },
         { key: "r", label: "reboot",    confirm: true,  cmd: ["systemctl", "reboot"] },
+        { key: "u", label: "reboot to firmware (uefi)", confirm: true, cmd: ["systemctl", "reboot", "--firmware-setup"] },
         { key: "x", label: "shut down", confirm: true,  cmd: ["systemctl", "poweroff"] }
     ]
 

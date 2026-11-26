@@ -3,14 +3,21 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 
-// Which overlay is open: "", "apps", "clip", "sheet", "leader", "power", "picker", "quick", "overview",
-// or a bar popup: "net", "cpu", "mem", "vol", "bat", "clock", "privacy".
-// One at a time: opening one closes the others.
+// Which overlay is open: "", "apps", "clip", "sheet", "leader", "power", "picker",
+// "quick", "dash", "overview". One at a time: opening one closes the others.
+// quickSection: which part of quick settings is unfolded ("wifi", "bt", "audio",
+// "display", "battery", "notifs"); each status icon opens quick settings at its part.
 Singleton {
     id: root
     property string open: ""
+    property string quickSection: "notifs"
 
     function toggle(name) { open = (open === name) ? "" : name; }
+    function openQuick(section) {
+        if (open === "quick" && quickSection === section) { open = ""; return; }
+        quickSection = section;
+        open = "quick";
+    }
     function close() { open = ""; }
 
     // Show the keybind cheatsheet once per login (false = never).
@@ -53,7 +60,7 @@ Singleton {
     }
     IpcHandler {
         target: "quick"
-        function toggle(): void { root.toggle("quick"); }
+        function toggle(): void { root.openQuick("notifs"); }
     }
     IpcHandler {
         target: "power"

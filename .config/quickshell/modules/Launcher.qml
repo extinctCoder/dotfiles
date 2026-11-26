@@ -57,11 +57,13 @@ LazyLoader {
 
         Rectangle {
             id: box
-            anchors.centerIn: parent
+            // flush under the bar's left corner (the logo opens it)
+            anchors { top: parent.top; left: parent.left; topMargin: Style.barHeight - Style.border }
             width: 620
             height: content.implicitHeight + Style.pad * 2
-            color: Colors.panel
-            border { width: Style.border; color: Colors.border }
+            color: Colors.raised
+            Rectangle { anchors { right: parent.right; top: parent.top; bottom: parent.bottom } width: Style.border; color: Colors.border }
+            Rectangle { anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: Style.border; color: Colors.border }
 
             MouseArea { anchors.fill: parent } // clicks inside stay inside
 

@@ -51,4 +51,22 @@ Singleton {
     readonly property string history: String.fromCodePoint(0xf02da)
     readonly property string youtube: String.fromCodePoint(0xf05c3)
     readonly property string play: String.fromCodePoint(0xf040c)
+    // bar, panels and cards
+    readonly property string logo: String.fromCodePoint(0xf322)       // linux-endeavour
+    readonly property string pause: String.fromCodePoint(0xf03e4)
+    readonly property string playIcon: String.fromCodePoint(0xf040a)
+    readonly property string next: String.fromCodePoint(0xf04ad)
+    readonly property string previous: String.fromCodePoint(0xf04ae)
+    readonly property string repeat: String.fromCodePoint(0xf0456)
+    readonly property string repeatOff: String.fromCodePoint(0xf0457)
+    readonly property string micOff: String.fromCodePoint(0xf036d)
+    readonly property string chevron: String.fromCodePoint(0xf0142)
+    readonly property string chevronDown: String.fromCodePoint(0xf0140)
+    readonly property string speaker: String.fromCodePoint(0xf04c3)
+    readonly property string headphones: String.fromCodePoint(0xf02cb)
+    readonly property string reply: String.fromCodePoint(0xf045a)
+    readonly property string dashboard: String.fromCodePoint(0xf056e)
+    // battery by level, 10% steps (md-battery_10 .. md-battery_90, then full)
+    readonly property var batteryLevels: [0xf007a, 0xf007b, 0xf007c, 0xf007d, 0xf007e, 0xf007f, 0xf0080, 0xf0081, 0xf0082, 0xf0079].map(c => String.fromCodePoint(c))
+    function batteryFor(percent) { return batteryLevels[Math.max(0, Math.min(9, Math.ceil(percent / 10) - 1))]; }
 }
