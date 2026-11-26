@@ -11,7 +11,11 @@ yay -S --needed yamis-icon-theme-git papirus-icon-theme
 
 accent=$(cat "$HOME/.cache/icon-accent" 2>/dev/null || echo '#d8dee9')
 "$HOME/.config/matugen/hooks/icons-recolor" "$accent"
-[ -d "$HOME/.local/share/icons/YAMIS-matugen" ] || { echo "YAMIS was not found after installing; nothing changed."; exit 1; }
+[ -d "$HOME/.local/share/icons/YAMIS-matugen" ] || {
+    echo "YAMIS was not found after installing; nothing changed. Where pacman put it:"
+    pacman -Ql yamis-icon-theme-git | grep 'index.theme'
+    exit 1
+}
 
 # Hyprland's autostart picks YAMIS-matugen from now on (when it exists); set it now too
 gsettings set org.gnome.desktop.interface icon-theme 'YAMIS-matugen'

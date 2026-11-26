@@ -8,13 +8,22 @@ set -e
 color=$1
 case "$color" in \#[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]) ;; *) echo "usage: $0 '#rrggbb'" >&2; exit 1 ;; esac
 
-# the installed YAMIS (not our copy): the theme whose index.theme names YAMIS
+# the installed YAMIS (not our copy): ask pacman where the package put its
+# index.theme; else look for a theme named like YAMIS (any spelling)
 src=""
-for d in /usr/share/icons/* "$HOME/.local/share/icons"/*; do
-    [ -f "$d/index.theme" ] || continue
-    case "$(basename "$d")" in YAMIS-matugen) continue ;; esac
-    grep -qi '^Name=.*YAMIS\|^Name=.*yet another monochrome' "$d/index.theme" && { src=$d; break; }
-done
+if command -v pacman >/dev/null 2>&1; then
+    idx=$(pacman -Qlq yamis-icon-theme-git yamis-icon-theme 2>/dev/null | grep '/index\.theme$' | head -n 1)
+    [ -n "$idx" ] && src=$(dirname "$idx")
+fi
+if [ -z "$src" ]; then
+    for d in /usr/share/icons/* "$HOME/.local/share/icons"/*; do
+        [ -f "$d/index.theme" ] || continue
+        case "$(basename "$d")" in YAMIS-matugen) continue ;; esac
+        if grep -qiE '^Name=.*(yamis|yet.another.monochrome)' "$d/index.theme" || basename "$d" | grep -qiE 'yamis|yet.another.monochrome'; then
+            src=$d; break
+        fi
+    done
+fi
 [ -n "$src" ] || exit 0
 
 dst="$HOME/.local/share/icons/YAMIS-matugen"
