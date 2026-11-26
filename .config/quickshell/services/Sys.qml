@@ -21,6 +21,10 @@ Singleton {
     property var txHistory: []
     property real uptime: -1         // seconds since boot
     property string host: ""         // this machine's name (/etc/hostname)
+    property string kernel: ""       // e.g. 6.17.2-arch1-1
+    property var load: []            // 1, 5 and 15 minute load averages
+    property real mhz: -1            // average current cpu frequency
+    property var cpuHistory: []      // last 60 samples of total cpu, 0..100
     readonly property real memPercent: memTotal > 0 ? memUsed / memTotal * 100 : -1
 
     property var prevCpu: null
@@ -58,7 +62,7 @@ Singleton {
 
     Process {
         id: sample
-        command: ["sh", "-c", 'cat /proc/stat /proc/meminfo /proc/net/dev; echo "UP $(cut -d " " -f 1 /proc/uptime)"; [ -n "$1" ] && echo "TEMP $(cat "$1" 2>/dev/null)"',
+        command: ["sh", "-c", 'cat /proc/stat /proc/meminfo /proc/net/dev; echo "UP $(cut -d " " -f 1 /proc/uptime)"; echo "LOAD $(cut -d " " -f 1-3 /proc/loadavg)"; echo "MHZ $(awk -F: \"/^cpu MHz/ {s+=\\$2; n++} END {if (n) printf \\\"%d\\\", s/n}\" /proc/cpuinfo)"; [ -n "$1" ] && echo "TEMP $(cat "$1" 2>/dev/null)"',
             "sh", root.tempFile]
         stdout: StdioCollector { onStreamFinished: root.parse(text) }
     }
@@ -85,6 +89,10 @@ Singleton {
             if (m && m[1] !== "lo") { rx += Number(m[2]); tx += Number(m[3]); continue; }
             m = line.match(/^TEMP (\d+)/);
             if (m) t = Number(m[1]) / 1000;
+            m = line.match(/^LOAD ([\d.]+) ([\d.]+) ([\d.]+)/);
+            if (m) root.load = [Number(m[1]), Number(m[2]), Number(m[3])];
+            m = line.match(/^MHZ (\d+)/);
+            if (m) root.mhz = Number(m[1]);
             m = line.match(/^UP ([\d.]+)/);
             if (m) root.uptime = Number(m[1]);
         }
@@ -95,6 +103,7 @@ Singleton {
                 return dt > 0 ? Math.max(0, Math.min(100, (1 - di / dt) * 100)) : 0;
             });
             root.cpu = usage[0];
+            root.cpuHistory = root.cpuHistory.concat([root.cpu]).slice(-60);
             root.cores = usage.slice(1);
             root.coreHistory = root.coreHistory.concat([root.cores]).slice(-30);
         }
@@ -120,5 +129,10 @@ Singleton {
         path: "/etc/hostname"
         printErrors: false
         onLoaded: root.host = text().trim()
+    }
+    Process {
+        running: true
+        command: ["uname", "-r"]
+        stdout: StdioCollector { onStreamFinished: root.kernel = text.trim() }
     }
 }

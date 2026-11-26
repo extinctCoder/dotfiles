@@ -55,6 +55,10 @@ Singleton {
         function leader(): void { root.toggle("leader"); }
     }
     IpcHandler {
+        target: "dash"
+        function toggle(): void { root.toggle("dash"); }
+    }
+    IpcHandler {
         target: "overview"
         function toggle(): void { root.toggle("overview"); }
     }

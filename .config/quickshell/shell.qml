@@ -19,6 +19,7 @@ ShellRoot {
     Launcher {}
     Notifications {}
     QuickPanel {}
+    Dashboard {}
     Overview {}
     Cheatsheet {}
     PowerMenu {}

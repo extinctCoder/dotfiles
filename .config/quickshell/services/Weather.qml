@@ -15,14 +15,21 @@ Singleton {
     property real temp: NaN
     property real feels: NaN
     property int code: -1
-    property var hours: []      // [{ hour: "14", temp: 26.1 }], next 12 hours
+    property var hours: []      // [{ hour: "14", temp: 26.1, code: 2, rain: 10 }], next 24 hours
+    property var days: []       // [{ day: "fri", min: 21, max: 30, code: 3, rain: 40, uv: 6 }], 7 days (today first)
+    property real humidity: NaN // %
+    property real wind: NaN     // km/h
+    property real uv: NaN       // today's max
+    property real rainChance: NaN // % in the coming hour
     property string sunrise: "" // "06:14"
     property string sunset: ""
     readonly property string condition: describe(code)
 
     readonly property string url: "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon
-        + "&current=temperature_2m,apparent_temperature,weather_code"
-        + "&hourly=temperature_2m&daily=sunrise,sunset&timezone=auto&forecast_days=2&forecast_hours=12"
+        + "&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m"
+        + "&hourly=temperature_2m,weather_code,precipitation_probability"
+        + "&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,uv_index_max"
+        + "&timezone=auto&forecast_days=7&forecast_hours=24"
 
     function describe(c) { // WMO weather codes
         if (c < 0) return "--";
@@ -56,7 +63,20 @@ Singleton {
             root.temp = d.current.temperature_2m;
             root.feels = d.current.apparent_temperature;
             root.code = d.current.weather_code;
-            root.hours = d.hourly.time.map((t, i) => ({ hour: t.slice(11, 13), temp: d.hourly.temperature_2m[i] }));
+            root.hours = d.hourly.time.map((t, i) => ({
+                hour: t.slice(11, 13), temp: d.hourly.temperature_2m[i],
+                code: d.hourly.weather_code[i], rain: d.hourly.precipitation_probability[i]
+            }));
+            root.humidity = d.current.relative_humidity_2m;
+            root.wind = d.current.wind_speed_10m;
+            root.rainChance = d.hourly.precipitation_probability[0];
+            root.uv = d.daily.uv_index_max[0];
+            const names = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+            root.days = d.daily.time.map((t, i) => ({
+                day: i === 0 ? "today" : names[new Date(t + "T12:00:00").getDay()],
+                min: d.daily.temperature_2m_min[i], max: d.daily.temperature_2m_max[i],
+                code: d.daily.weather_code[i], rain: d.daily.precipitation_probability_max[i], uv: d.daily.uv_index_max[i]
+            }));
             root.sunrise = d.daily.sunrise[0].slice(11, 16);
             root.sunset = d.daily.sunset[0].slice(11, 16);
             root.ok = true;
