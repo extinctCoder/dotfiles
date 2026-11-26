@@ -220,7 +220,7 @@ LazyLoader {
                         }
                         Mono {
                             visible: Privacy.active
-                            text: "in use: " + Privacy.micApps.concat(Privacy.videoApps).map(n => n.properties["application.name"] || n.name).join(", ")
+                            text: "in use: " + Privacy.micApps.concat(Privacy.videoApps).join(", ")
                             color: Colors.alert
                             font.pixelSize: Style.fontSm
                         }

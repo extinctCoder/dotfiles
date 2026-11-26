@@ -29,6 +29,9 @@ Singleton {
     readonly property string current: index >= 0 ? lines[index].text : ""
     readonly property string previous: index > 0 ? lines[index - 1].text : ""
     readonly property bool listening: recognizer.running
+    // what it is doing or found, for the dashboard when there are no lyrics (also in qs log)
+    property string status: ""
+    function say(s) { status = s; console.log("lyrics: " + s + (key ? "  [" + key + "]" : "")); }
     readonly property bool canRecognize: hasSongrec
 
     property bool hasSongrec: true   // false once the recognizer reports songrec missing
@@ -100,6 +103,7 @@ Singleton {
         if (key === "") return;
         if (fetch.running || recognizer.running) { pending = true; return; }
         const known = cache[key];
+        say("looking up");
         if (known && !known.none) { // recognized before: use the real names right away
             tried = true;
             Media.recognized = known;
@@ -118,6 +122,7 @@ Singleton {
         if (!hasSongrec || tried || key === "" || fetch.running || recognizer.running) return;
         tried = true;
         fetchingKey = key;
+        say("identifying the song by ear…");
         recognizer.running = true;
     }
     // after a lookup or recognition exits: a changed track starts over; else a
@@ -151,7 +156,7 @@ Singleton {
         onExited: root.afterRun()
         stdout: StdioCollector {
             onStreamFinished: {
-                let found = [];
+                let found = [], why = "lrclib has nothing for it";
                 try {
                     if (text.startsWith("GET ")) {
                         found = root.parse(JSON.parse(text.slice(4)).syncedLyrics);
@@ -162,10 +167,18 @@ Singleton {
                         // when the names came from recognition (the length is still the video's)
                         const tolerance = Media.album === "" ? 20 : 5;
                         found = hits.length && Math.abs(hits[0].duration - Media.length) <= tolerance ? root.parse(hits[0].syncedLyrics) : [];
+                        if (hits.length && !found.length)
+                            why = "lrclib's lyrics are for a " + Math.round(hits[0].duration) + " s version, this one is " + Math.round(Media.length) + " s (timing would be off)";
+                        else if (!hits.length && text.length > 9) why = "lrclib has it, but without synced lyrics";
                     }
-                } catch (e) { found = []; }
+                } catch (e) { found = []; why = "lrclib didn't answer"; }
                 if (root.fetchingKey !== root.key) return; // track changed meanwhile (a new lookup follows)
                 root.lines = found;
+                const named = Media.recognized ? Media.recognized.artist + " – " + Media.recognized.title + ": " : "";
+                if (found.length) root.say(named + "synced lyrics found (" + found.length + " lines)");
+                else if (root.tried || !root.hasSongrec) root.say(named + why + (root.hasSongrec ? "" : " · install songrec to identify songs by ear"));
+                else if (!Media.active) root.say(why + " · will identify it by ear once it plays");
+                else root.say(why + " · identifying it by ear next");
                 root.wantRecognize = found.length === 0 && Media.active;
                 if (!fetch.running) root.afterRun(); // exited before its output was read
             }
@@ -180,12 +193,18 @@ Singleton {
         command: ["sh", "-c",
             'command -v songrec >/dev/null && command -v pw-record >/dev/null || exit 127; '
             + 'mkdir -p "$HOME/.cache/quickshell"; tmp=$(mktemp --suffix=.wav); '
-            + 'timeout -s INT 11 pw-record --rate 16000 --channels 1 -P \'{ "stream.capture.sink": true }\' "$tmp" >/dev/null 2>&1; '
+            + 'timeout -s INT 11 pw-record --rate 16000 --channels 1 -P \'{ "stream.capture.sink": true, "node.name": "lyrics-listener", "media.name": "identifying the song" }\' "$tmp" >/dev/null 2>&1; '
             + 'songrec audio-file-to-recognized-song "$tmp" 2>/dev/null; rc=$?; rm -f "$tmp"; exit $rc']
-        onExited: code => { if (code === 127) root.hasSongrec = false; root.afterRun(); }
+        onExited: code => {
+            if (code === 127) { root.hasSongrec = false; root.say("songrec isn't installed: can't identify songs by ear"); }
+            root.afterRun();
+        }
         stdout: StdioCollector {
             onStreamFinished: {
-                if (text.trim() === "") return; // failed (network, no sound): try again on the next track
+                if (text.trim() === "") { // songrec missing (said on exit), or no network / no sound: try again on the next track
+                    if (root.hasSongrec) root.say("couldn't reach Shazam or heard no sound");
+                    return;
+                }
                 let song = null;
                 try {
                     const t = JSON.parse(text).track;
@@ -201,7 +220,9 @@ Singleton {
                 } catch (e) { return; }
                 const k = root.fetchingKey;
                 root.remember(k, song ?? { none: true });
-                if (k !== root.key || !song) return;
+                if (k !== root.key) return;
+                if (!song) { root.say("Shazam doesn't know this one"); return; }
+                root.say("identified: " + song.artist + " – " + song.title + " · looking up its lyrics");
                 Media.recognized = song;
                 root.lookup(song.artist, song.title, song.album, song.artist, song.title);
             }

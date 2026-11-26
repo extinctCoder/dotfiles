@@ -314,8 +314,14 @@ LazyLoader {
                         }
                     }
                     Tile {
-                        visible: Lyrics.lines.length > 0 || Lyrics.listening
-                        Small { visible: Lyrics.listening; Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; text: Icons.music + " identifying the song… (lyrics follow)" }
+                        visible: Media.present
+                        Small { // no lyrics: say why (or what it is doing)
+                            visible: Lyrics.lines.length === 0
+                            Layout.fillWidth: true
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.Wrap
+                            text: Icons.music + " " + (Lyrics.status || "no lyrics")
+                        }
                         Small { Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight; text: Lyrics.previous }
                         Mono { Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.Wrap; text: Lyrics.current; color: Colors.accent }
                         Small { Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight; text: Lyrics.index + 1 < Lyrics.lines.length ? Lyrics.lines[Lyrics.index + 1].text : "" }
