@@ -40,6 +40,19 @@ LazyLoader {
             ColumnLayout { id: tileCol; anchors { left: parent.left; right: parent.right; top: parent.top; margins: parent.padding } spacing: Style.gap }
         }
         component Small: Mono { color: Colors.fgMuted; font.pixelSize: Style.fontSm }
+        // a small framed label (the media tab's details)
+        component Chip: Rectangle {
+            property string text: ""
+            property bool strong: false
+            signal clicked()
+            visible: text !== ""
+            implicitWidth: chipText.implicitWidth + Style.pad * 1.5
+            implicitHeight: chipText.implicitHeight + 2
+            color: "transparent"
+            border { width: Style.border; color: strong ? Colors.accent : Colors.border }
+            Mono { id: chipText; anchors.centerIn: parent; text: parent.text; color: parent.strong ? Colors.accent : Colors.fgMuted; font.pixelSize: Style.fontSm }
+            TapHandler { onTapped: parent.clicked() }
+        }
         component Bar1: Rectangle { // a thin level bar
             property real value: 0
             Layout.fillWidth: true
@@ -243,18 +256,6 @@ LazyLoader {
                     spacing: Style.pad
                     readonly property var song: Media.recognized // the real names and details when identified
                     function clock(s) { return Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0"); }
-                    component Chip: Rectangle {
-                        property string text: ""
-                        property bool strong: false
-                        signal clicked()
-                        visible: text !== ""
-                        implicitWidth: chipText.implicitWidth + Style.pad * 1.5
-                        implicitHeight: chipText.implicitHeight + 2
-                        color: "transparent"
-                        border { width: Style.border; color: strong ? Colors.accent : Colors.border }
-                        Small { id: chipText; anchors.centerIn: parent; text: parent.text; color: parent.strong ? Colors.accent : Colors.fgMuted }
-                        TapHandler { onTapped: parent.clicked() }
-                    }
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: Style.padLg
