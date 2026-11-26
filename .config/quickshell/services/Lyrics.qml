@@ -39,6 +39,8 @@ Singleton {
     property string fetchingKey: ""  // the track the running lookup or recognition is for
     property bool tried: false       // recognition already tried for this track
     property bool wantRecognize: false // the quick lookup found nothing: recognize once it has exited
+    property bool missed: false        // the quick lookup ran for this track and found nothing
+    property bool retried: false       // one more try by ear, 30 s later, after Shazam missed
     property var query: ({ artist: "", title: "", album: "", length: "0", cleanArtist: "", cleanTitle: "" })
     property var cache: ({})         // track key -> { artist, title, album, cover } or { none: true }
 
@@ -86,7 +88,7 @@ Singleton {
 
     // Players announce a new track in pieces (browsers: title, then artist, then
     // length), so wait until it settles, then look up once with complete info.
-    onKeyChanged: { lines = []; Media.recognized = null; tried = false; settle.restart(); }
+    onKeyChanged: { lines = []; Media.recognized = null; tried = false; missed = false; retried = false; retry.stop(); settle.restart(); }
     Component.onCompleted: settle.restart() // a song may already be playing (the shell reloads on every wallpaper change)
     Timer {
         id: settle
@@ -96,7 +98,7 @@ Singleton {
     // a paused track that found nothing gets recognized once it plays
     Connections {
         target: Media
-        function onActiveChanged() { if (Media.active && root.lines.length === 0 && !root.tried && root.key !== "") root.recognize(); }
+        function onActiveChanged() { if (Media.active && root.missed && !root.tried && root.key !== "") root.recognize(); }
     }
 
     function start() {
@@ -109,7 +111,7 @@ Singleton {
             Media.recognized = known;
             lookup(known.artist, known.title, known.album, known.artist, known.title);
         } else {
-            if (known && known.none) tried = true; // Shazam didn't know it last time
+            if (known && known.none) tried = true; // Shazam missed it earlier this session
             lookup(Media.artist, Media.title, Media.album, clean.artist, clean.title);
         }
     }
@@ -131,13 +133,28 @@ Singleton {
         if (pending) { pending = false; wantRecognize = false; settle.restart(); return; }
         if (wantRecognize && !fetch.running && !recognizer.running) { wantRecognize = false; recognize(); }
     }
+    // Identified songs are written to disk; misses stay in memory only (a sample can
+    // be unlucky: silence, an intro, an ad), so they are tried again next session.
     function remember(k, value) {
         const c = Object.assign({}, cache);
         c[k] = value;
         const keys = Object.keys(c);
         for (const old of keys.slice(0, Math.max(0, keys.length - 500))) delete c[old]; // keep the last 500
         cache = c;
-        cacheFile.setText(JSON.stringify(c));
+        const known = {};
+        for (const key of Object.keys(c)) if (!c[key].none) known[key] = c[key];
+        cacheFile.setText(JSON.stringify(known));
+    }
+    // after a miss: one more try by ear, 30 s further into the song
+    Timer {
+        id: retry
+        interval: 30000
+        onTriggered: {
+            if (root.lines.length > 0 || root.retried || root.key === "") return;
+            root.retried = true;
+            root.tried = false;
+            if (Media.active) root.recognize(); else root.missed = true; // tries when it plays
+        }
     }
 
     FileView {
@@ -145,7 +162,13 @@ Singleton {
         path: Quickshell.env("HOME") + "/.cache/quickshell/lyrics-recognized.json"
         printErrors: false // missing until the first recognition
         atomicWrites: true
-        onLoaded: { try { root.cache = JSON.parse(text()) || {}; } catch (e) { root.cache = {}; } }
+        onLoaded: {
+            try {
+                const c = JSON.parse(text()) || {};
+                for (const k of Object.keys(c)) if (c[k].none) delete c[k]; // older versions saved misses too
+                root.cache = c;
+            } catch (e) { root.cache = {}; }
+        }
     }
 
     Process {
@@ -174,6 +197,7 @@ Singleton {
                 } catch (e) { found = []; why = "lrclib didn't answer"; }
                 if (root.fetchingKey !== root.key) return; // track changed meanwhile (a new lookup follows)
                 root.lines = found;
+                root.missed = found.length === 0;
                 const named = Media.recognized ? Media.recognized.artist + " – " + Media.recognized.title + ": " : "";
                 if (found.length) root.say(named + "synced lyrics found (" + found.length + " lines)");
                 else if (root.tried || !root.hasSongrec) root.say(named + why + (root.hasSongrec ? "" : " · install songrec to identify songs by ear"));
@@ -221,7 +245,11 @@ Singleton {
                 const k = root.fetchingKey;
                 root.remember(k, song ?? { none: true });
                 if (k !== root.key) return;
-                if (!song) { root.say("Shazam doesn't know this one"); return; }
+                if (!song) {
+                    root.say(root.retried ? "Shazam doesn't know this one" : "Shazam didn't recognize it · trying again in 30 s");
+                    if (!root.retried) retry.restart();
+                    return;
+                }
                 root.say("identified: " + song.artist + " – " + song.title + " · looking up its lyrics");
                 Media.recognized = song;
                 root.lookup(song.artist, song.title, song.album, song.artist, song.title);

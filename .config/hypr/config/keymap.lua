@@ -31,6 +31,7 @@ bind("SUPER + slash", "qs ipc call keys cheatsheet", "keybind cheatsheet", "shel
 bind("SUPER + n", "qs ipc call notifs clear", "clear notifications", "shell")
 bind("SUPER + a", "qs ipc call quick toggle", "quick settings + notifications", "shell")
 bind("SUPER + i", "qs ipc call dash toggle", "dashboard", "shell")
+bind("SUPER + SHIFT + r", "qs kill; quickshell -d", "restart the shell", "shell")
 bind("SUPER + tab", "qs ipc call overview toggle", "window overview", "shell")
 bind("SUPER + w", "qs ipc call picker toggle", "wallpaper picker", "shell")
 

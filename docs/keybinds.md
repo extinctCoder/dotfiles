@@ -27,6 +27,7 @@ Directions follow vim: `H` left, `J` down, `K` up, `L` right.
 | `Super + N` | clear notifications |
 | `Super + A` | quick settings + notifications |
 | `Super + I` | dashboard |
+| `Super + Shift + R` | restart the shell |
 | `Super + Tab` | window overview |
 | `Super + W` | wallpaper picker |
 
