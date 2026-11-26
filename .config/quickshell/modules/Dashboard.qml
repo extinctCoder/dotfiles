@@ -288,17 +288,21 @@ LazyLoader {
                                 Chip { text: Lyrics.source === "ear" ? "identified by ear" : ""; strong: true }
                                 Chip { text: mediaTab.song?.url ? "open in shazam ↗" : ""; onClicked: Qt.openUrlExternally(mediaTab.song.url) }
                             }
-                            // spectrum (cava), square bars
+                            // spectrum (cava), square bars. A fixed height (Layout.preferredHeight):
+                            // a layout sizes a Row by its tallest bar, and bars sized from the Row's
+                            // height would then shrink it a little on every update, down to nothing.
                             Row {
+                                id: spectrum
+                                readonly property real full: Style.rowHeight * 1.6
                                 Layout.topMargin: Style.pad
-                                height: Style.rowHeight * 1.6
+                                Layout.preferredHeight: full
                                 spacing: 2
                                 Repeater {
                                     model: 40
                                     Rectangle {
                                         required property int index
                                         width: 5
-                                        height: Math.max(1, (Visualizer.bars[index] ?? 0) * parent.height)
+                                        height: Math.max(1, (Visualizer.bars[index] ?? 0) * spectrum.full)
                                         anchors.bottom: parent.bottom
                                         color: Colors.accent
                                         opacity: 0.4 + 0.6 * (1 - index / 40)
