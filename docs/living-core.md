@@ -78,10 +78,20 @@ names like "…VEVO"). When that finds nothing while the song plays, it identifi
 the song **by ear**: it records about 11 seconds of what the speakers play (the
 output's monitor, never the microphone) and asks Shazam through SongRec, then
 looks up the real artist, title and album. Only a fingerprint of the audio is
-sent, to Shazam's servers only. Each track is recognized once and remembered in
-`~/.cache/quickshell/lyrics-recognized.json`; the dashboard and cards then show
-the real names and album cover. Needs `songrec` (`media/install.sh`); without it,
-the quick lookup still works.
+sent, to Shazam's servers only. Without a synced version, plain lyrics are shown,
+marked as not synced.
+
+The dashboard's media tab shows what was learned: the real cover, album, year,
+genre and label, where the names came from (the player, or by ear), a link to
+the song, and the lyrics as a window that follows the song.
+
+Privacy: identified songs are kept **in memory only** (they survive shell
+reloads, not a reboot; the last 50), album covers are downloaded to the
+session's runtime folder (also gone at reboot), the log never names a track, and
+the 11 s recording is deleted right after recognition. Quick settings → audio
+has the **listen by ear** switch and **forget now**. LRCLIB still receives the
+names of what plays (that's how lyrics are found). Needs `songrec`
+(`media/install.sh`); without it, the quick lookup still works.
 
 ## Rendering and cost
 

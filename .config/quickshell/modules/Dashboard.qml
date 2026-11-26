@@ -236,15 +236,30 @@ LazyLoader {
 
                 // ---------------- 2 media ----------------
                 ColumnLayout {
+                    id: mediaTab
                     visible: win.tab === 1
                     Layout.fillWidth: true
                     Layout.margins: Style.pad
                     spacing: Style.pad
-                    readonly property var player: Media.player
+                    readonly property var song: Media.recognized // the real names and details when identified
+                    function clock(s) { return Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0"); }
+                    component Chip: Rectangle {
+                        property string text: ""
+                        property bool strong: false
+                        signal clicked()
+                        visible: text !== ""
+                        implicitWidth: chipText.implicitWidth + Style.pad * 1.5
+                        implicitHeight: chipText.implicitHeight + 2
+                        color: "transparent"
+                        border { width: Style.border; color: strong ? Colors.accent : Colors.border }
+                        Small { id: chipText; anchors.centerIn: parent; text: parent.text; color: parent.strong ? Colors.accent : Colors.fgMuted }
+                        TapHandler { onTapped: parent.clicked() }
+                    }
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: Style.padLg
                         Rectangle {
+                            Layout.alignment: Qt.AlignTop
                             implicitWidth: 170; implicitHeight: 170
                             color: Colors.panel
                             border { width: Style.border; color: Colors.border }
@@ -255,12 +270,26 @@ LazyLoader {
                             Layout.fillWidth: true
                             spacing: Style.gap
                             Mono { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.present ? Media.shownTitle : "nothing playing"; font.pixelSize: Style.fontLg }
-                            Small { Layout.fillWidth: true; elide: Text.ElideRight; text: [Media.shownArtist, Media.recognized?.album || Media.album].filter(x => x).join(" · ") }
-                            Small { text: Media.player ? Media.player.identity.toLowerCase() : "" }
+                            Mono { Layout.fillWidth: true; elide: Text.ElideRight; text: Media.shownArtist }
+                            Small {
+                                Layout.fillWidth: true
+                                elide: Text.ElideRight
+                                text: [mediaTab.song?.album || Media.album, mediaTab.song?.year || ""].filter(x => x).join(" · ")
+                            }
+                            Flow { // details: genre, label, where the names came from, a link
+                                Layout.fillWidth: true
+                                Layout.topMargin: Style.gap
+                                spacing: Style.gap
+                                visible: Media.present
+                                Chip { text: (mediaTab.song?.genre || "").toLowerCase() }
+                                Chip { text: (mediaTab.song?.label || "").toLowerCase() }
+                                Chip { text: Media.present ? (Lyrics.source === "ear" ? "identified by ear" : "from the player") : ""; strong: Lyrics.source === "ear" }
+                                Chip { text: mediaTab.song?.url ? "open in shazam ↗" : ""; onClicked: Qt.openUrlExternally(mediaTab.song.url) }
+                            }
                             // spectrum (cava), square bars
                             Row {
                                 Layout.topMargin: Style.pad
-                                height: Style.rowHeight * 2
+                                height: Style.rowHeight * 1.6
                                 spacing: 2
                                 Repeater {
                                     model: 40
@@ -284,11 +313,17 @@ LazyLoader {
                                     onTapped: point => { Media.player.position = point.position.x / parent.width * Media.length; }
                                 }
                             }
-                            RowLayout {
+                            RowLayout { // time, and what is really playing (the player and its own title)
                                 Layout.fillWidth: true
-                                Small { text: Math.floor(Media.position / 60) + ":" + String(Math.floor(Media.position % 60)).padStart(2, "0") }
-                                Item { Layout.fillWidth: true }
-                                Small { text: Math.floor(Media.length / 60) + ":" + String(Math.floor(Media.length % 60)).padStart(2, "0") }
+                                spacing: Style.pad
+                                Small { text: mediaTab.clock(Media.position) }
+                                Small {
+                                    Layout.fillWidth: true
+                                    horizontalAlignment: Text.AlignHCenter
+                                    elide: Text.ElideMiddle
+                                    text: Media.player ? Media.player.identity.toLowerCase() + (mediaTab.song ? " · \"" + Media.title + "\"" : "") : ""
+                                }
+                                Small { text: mediaTab.clock(Media.length) }
                             }
                             RowLayout {
                                 spacing: Style.padLg
@@ -313,18 +348,46 @@ LazyLoader {
                             }
                         }
                     }
+                    // lyrics: a 5-line window that follows the song (past fade, current in the
+                    // accent, coming muted); plain lyrics when not synced; else what it's doing
                     Tile {
                         visible: Media.present
+                        RowLayout {
+                            Layout.fillWidth: true
+                            visible: Lyrics.lines.length > 0 || Lyrics.plain !== ""
+                            Small { Layout.fillWidth: true; text: Lyrics.lines.length ? "" : "lyrics · not synced, so nothing is highlighted" }
+                            Small { text: (Lyrics.lines.length ? "synced" : "plain") + " · lrclib" }
+                        }
+                        Repeater {
+                            model: Lyrics.lines.length ? 5 : 0
+                            Mono {
+                                required property int index
+                                readonly property int at: Lyrics.index + index - 2 // two before, the current one, two after
+                                readonly property bool now: index === 2
+                                Layout.fillWidth: true
+                                horizontalAlignment: Text.AlignHCenter
+                                elide: Text.ElideRight
+                                text: at >= 0 && at < Lyrics.lines.length ? Lyrics.lines[at].text : ""
+                                color: now ? Colors.accent : Colors.fgMuted
+                                opacity: now ? 1 : index < 2 ? 0.45 + 0.2 * index : 1 - 0.2 * (index - 3)
+                                font.pixelSize: now ? Style.fontLg : Style.fontSm
+                            }
+                        }
+                        Flickable { // plain lyrics: scroll them
+                            visible: Lyrics.lines.length === 0 && Lyrics.plain !== ""
+                            Layout.fillWidth: true
+                            implicitHeight: Math.min(plainText.implicitHeight, Style.rowHeight * 6)
+                            contentHeight: plainText.implicitHeight
+                            clip: true
+                            Small { id: plainText; width: parent.width; wrapMode: Text.Wrap; text: Lyrics.plain; lineHeight: 1.2 }
+                        }
                         Small { // no lyrics: say why (or what it is doing)
-                            visible: Lyrics.lines.length === 0
+                            visible: Lyrics.lines.length === 0 && Lyrics.plain === ""
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignHCenter
                             wrapMode: Text.Wrap
                             text: Icons.music + " " + (Lyrics.status || "no lyrics")
                         }
-                        Small { Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight; text: Lyrics.previous }
-                        Mono { Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.Wrap; text: Lyrics.current; color: Colors.accent }
-                        Small { Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight; text: Lyrics.index + 1 < Lyrics.lines.length ? Lyrics.lines[Lyrics.index + 1].text : "" }
                     }
                 }
 

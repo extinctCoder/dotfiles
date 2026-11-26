@@ -11,10 +11,12 @@ import QtQuick
 //      text. Search hits must match the length: within 5 s, 20 s without album.
 //   2. By ear, when that finds nothing while it plays: record ~11 s of what the
 //      speakers play (not the microphone), recognize it with SongRec (Shazam),
-//      then look up the recognized artist, title and album. Each track is
-//      recognized once: the result is remembered in
-//      ~/.cache/quickshell/lyrics-recognized.json. Media.recognized carries the
-//      real names and cover for the dashboard and cards.
+//      then look up the recognized artist, title and album. Only a fingerprint
+//      goes to Shazam. Switch it off with byEar (quick settings, audio).
+// Privacy: identified songs are kept in memory only (they survive shell reloads,
+// not a reboot; the last 50), the log never names tracks, forget() clears them
+// now. Media.recognized carries the real names, cover and details.
+// Without synced lyrics, plain lyrics are shown (marked as not synced).
 // No lyrics found = nothing shown.
 Singleton {
     id: root
@@ -31,7 +33,28 @@ Singleton {
     readonly property bool listening: recognizer.running
     // what it is doing or found, for the dashboard when there are no lyrics (also in qs log)
     property string status: ""
-    function say(s) { status = s; console.log("lyrics: " + s + (key ? "  [" + key + "]" : "")); }
+    // say(what the dashboard shows, what the log gets): the log never names the track
+    function say(s, log) { status = s; console.log("lyrics: " + (log ?? s)); }
+    property string plain: ""          // plain lyrics, when no synced version exists
+    readonly property string source: Media.recognized ? "ear" : "player" // where the names came from
+    readonly property int remembered: Object.keys(cache).filter(k => !cache[k].none).length
+
+    // listening by ear on/off: a setting (kept in ~/.local/state), not listening data
+    property bool byEar: true
+    function setByEar(on) { byEar = on; byEarFile.setText(on ? "on\n" : "off\n"); }
+    FileView {
+        id: byEarFile
+        path: Quickshell.env("HOME") + "/.local/state/lyrics-by-ear"
+        printErrors: false // missing = on
+        onLoaded: root.byEar = text().trim() !== "off"
+    }
+    // forget now: identified songs (memory) and covers (Album)
+    function forget() {
+        memory.cache = {};
+        Media.recognized = null;
+        Album.forget();
+        say("forgot identified songs and covers");
+    }
     readonly property bool canRecognize: hasSongrec
 
     property bool hasSongrec: true   // false once the recognizer reports songrec missing
@@ -42,7 +65,12 @@ Singleton {
     property bool missed: false        // the quick lookup ran for this track and found nothing
     property bool retried: false       // one more try by ear, 30 s later, after Shazam missed
     property var query: ({ artist: "", title: "", album: "", length: "0", cleanArtist: "", cleanTitle: "" })
-    property var cache: ({})         // track key -> { artist, title, album, cover } or { none: true }
+    property alias cache: memory.cache // track key -> { artist, title, album, year, genre, label, url, cover } or { none: true }
+    PersistentProperties { // memory only: survives shell reloads (wallpaper changes), not a reboot
+        id: memory
+        reloadableId: "lyricsMemory"
+        property var cache: ({})
+    }
 
     readonly property string script:
         'ua="dotfiles-quickshell (github.com/extinctCoder/dotfiles)"; api=https://lrclib.net/api; '
@@ -88,7 +116,7 @@ Singleton {
 
     // Players announce a new track in pieces (browsers: title, then artist, then
     // length), so wait until it settles, then look up once with complete info.
-    onKeyChanged: { lines = []; Media.recognized = null; tried = false; missed = false; retried = false; retry.stop(); settle.restart(); }
+    onKeyChanged: { lines = []; plain = ""; Media.recognized = null; tried = false; missed = false; retried = false; retry.stop(); settle.restart(); }
     Component.onCompleted: settle.restart() // a song may already be playing (the shell reloads on every wallpaper change)
     Timer {
         id: settle
@@ -121,7 +149,7 @@ Singleton {
         fetch.running = true;
     }
     function recognize() {
-        if (!hasSongrec || tried || key === "" || fetch.running || recognizer.running) return;
+        if (!byEar || !hasSongrec || tried || key === "" || fetch.running || recognizer.running) return;
         tried = true;
         fetchingKey = key;
         say("identifying the song by ear…");
@@ -137,13 +165,11 @@ Singleton {
     // be unlucky: silence, an intro, an ad), so they are tried again next session.
     function remember(k, value) {
         const c = Object.assign({}, cache);
-        c[k] = value;
+        delete c[k];
+        c[k] = value; // newest last
         const keys = Object.keys(c);
-        for (const old of keys.slice(0, Math.max(0, keys.length - 500))) delete c[old]; // keep the last 500
-        cache = c;
-        const known = {};
-        for (const key of Object.keys(c)) if (!c[key].none) known[key] = c[key];
-        cacheFile.setText(JSON.stringify(known));
+        for (const old of keys.slice(0, Math.max(0, keys.length - 50))) delete c[old]; // the last 50
+        memory.cache = c;
     }
     // after a miss: one more try by ear, 30 s further into the song
     Timer {
@@ -157,19 +183,8 @@ Singleton {
         }
     }
 
-    FileView {
-        id: cacheFile
-        path: Quickshell.env("HOME") + "/.cache/quickshell/lyrics-recognized.json"
-        printErrors: false // missing until the first recognition
-        atomicWrites: true
-        onLoaded: {
-            try {
-                const c = JSON.parse(text()) || {};
-                for (const k of Object.keys(c)) if (c[k].none) delete c[k]; // older versions saved misses too
-                root.cache = c;
-            } catch (e) { root.cache = {}; }
-        }
-    }
+    // the earlier version kept identified songs on disk: remove that file
+    Process { running: true; command: ["sh", "-c", 'rm -f "$HOME/.cache/quickshell/lyrics-recognized.json"'] }
 
     Process {
         id: fetch
@@ -179,31 +194,41 @@ Singleton {
         onExited: root.afterRun()
         stdout: StdioCollector {
             onStreamFinished: {
-                let found = [], why = "lrclib has nothing for it";
+                let found = [], plain = "", why = "lrclib has nothing for it";
                 try {
                     if (text.startsWith("GET ")) {
-                        found = root.parse(JSON.parse(text.slice(4)).syncedLyrics);
+                        const hit = JSON.parse(text.slice(4));
+                        found = root.parse(hit.syncedLyrics);
+                        if (!found.length) plain = hit.plainLyrics || "";
                     } else if (text.startsWith("SEARCH ")) {
-                        const hits = JSON.parse(text.slice(7)).filter(h => h.syncedLyrics);
+                        const hits = JSON.parse(text.slice(7));
                         hits.sort((a, b) => Math.abs(a.duration - Media.length) - Math.abs(b.duration - Media.length));
                         // the player's album decides: none = likely a video (intros, outros), even
                         // when the names came from recognition (the length is still the video's)
                         const tolerance = Media.album === "" ? 20 : 5;
-                        found = hits.length && Math.abs(hits[0].duration - Media.length) <= tolerance ? root.parse(hits[0].syncedLyrics) : [];
-                        if (hits.length && !found.length)
-                            why = "lrclib's lyrics are for a " + Math.round(hits[0].duration) + " s version, this one is " + Math.round(Media.length) + " s (timing would be off)";
-                        else if (!hits.length && text.length > 9) why = "lrclib has it, but without synced lyrics";
+                        const near = hits.filter(h => Math.abs(h.duration - Media.length) <= tolerance);
+                        const synced = near.find(h => h.syncedLyrics);
+                        if (synced) found = root.parse(synced.syncedLyrics);
+                        else plain = near.find(h => h.plainLyrics)?.plainLyrics ?? "";
+                        const other = hits.find(h => h.syncedLyrics);
+                        if (!found.length && !plain && other)
+                            why = "lrclib's lyrics are for a " + Math.round(other.duration) + " s version, this one is " + Math.round(Media.length) + " s (timing would be off)";
                     }
-                } catch (e) { found = []; why = "lrclib didn't answer"; }
+                } catch (e) { found = []; plain = ""; why = "lrclib didn't answer"; }
                 if (root.fetchingKey !== root.key) return; // track changed meanwhile (a new lookup follows)
                 root.lines = found;
-                root.missed = found.length === 0;
+                root.plain = plain;
+                root.missed = found.length === 0 && plain === "";
                 const named = Media.recognized ? Media.recognized.artist + " – " + Media.recognized.title + ": " : "";
-                if (found.length) root.say(named + "synced lyrics found (" + found.length + " lines)");
-                else if (root.tried || !root.hasSongrec) root.say(named + why + (root.hasSongrec ? "" : " · install songrec to identify songs by ear"));
+                if (found.length) root.say(named + "synced lyrics found (" + found.length + " lines)", "synced lyrics found (" + found.length + " lines)");
+                else if (plain) root.say(named + "plain lyrics only (not synced)", "plain lyrics only (not synced)");
+                else if (root.tried || !root.hasSongrec || !root.byEar) {
+                    const tail = !root.byEar ? " · listening by ear is off" : root.hasSongrec ? "" : " · install songrec to identify songs by ear";
+                    root.say(named + why + tail, why + tail);
+                }
                 else if (!Media.active) root.say(why + " · will identify it by ear once it plays");
                 else root.say(why + " · identifying it by ear next");
-                root.wantRecognize = found.length === 0 && Media.active;
+                root.wantRecognize = found.length === 0 && plain === "" && Media.active;
                 if (!fetch.running) root.afterRun(); // exited before its output was read
             }
         }
@@ -233,13 +258,18 @@ Singleton {
                 try {
                     const t = JSON.parse(text).track;
                     if (t && t.title) {
-                        let album = "";
+                        let album = "", year = "", label = "";
                         for (const sec of t.sections || []) {
                             if (sec.type !== "SONG") continue;
-                            for (const m of sec.metadata || []) if (m.title === "Album") album = m.text || "";
+                            for (const m of sec.metadata || []) {
+                                if (m.title === "Album") album = m.text || "";
+                                else if (m.title === "Released") year = m.text || "";
+                                else if (m.title === "Label") label = m.text || "";
+                            }
                             break;
                         }
-                        song = { artist: t.subtitle || "", title: t.title, album: album, cover: t.images?.coverart || "" };
+                        song = { artist: t.subtitle || "", title: t.title, album: album, year: year, label: label,
+                            genre: t.genres?.primary || "", url: t.url || "", cover: t.images?.coverart || "" };
                     }
                 } catch (e) { return; }
                 const k = root.fetchingKey;
@@ -250,7 +280,7 @@ Singleton {
                     if (!root.retried) retry.restart();
                     return;
                 }
-                root.say("identified: " + song.artist + " – " + song.title + " · looking up its lyrics");
+                root.say("identified: " + song.artist + " – " + song.title + " · looking up its lyrics", "identified · looking up its lyrics");
                 Media.recognized = song;
                 root.lookup(song.artist, song.title, song.album, song.artist, song.title);
             }

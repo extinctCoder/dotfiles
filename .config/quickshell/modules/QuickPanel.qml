@@ -218,6 +218,40 @@ LazyLoader {
                                 onClicked: Audio.setSink(modelData)
                             }
                         }
+                        // lyrics by ear: on/off, what is remembered, forget now
+                        Rectangle { Layout.fillWidth: true; Layout.topMargin: Style.gap; height: Style.border; color: Colors.border }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Mono { text: "listen by ear"; Layout.fillWidth: true }
+                            MonoButton {
+                                text: Lyrics.byEar ? "[on]" : "[off]"
+                                color: Lyrics.byEar ? Colors.accent : Colors.fgMuted
+                                onClicked: Lyrics.setByEar(!Lyrics.byEar)
+                            }
+                        }
+                        Mono {
+                            Layout.fillWidth: true
+                            wrapMode: Text.Wrap
+                            text: "when a title finds no lyrics: 11 s of the speakers → a fingerprint to Shazam. nothing is kept after a reboot"
+                            color: Colors.fgMuted
+                            font.pixelSize: Style.fontSm
+                        }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Mono {
+                                Layout.fillWidth: true
+                                text: "remembered this session: " + Lyrics.remembered + " song" + (Lyrics.remembered === 1 ? "" : "s") + " · " + Album.count + " cover" + (Album.count === 1 ? "" : "s")
+                                color: Colors.fgMuted
+                                font.pixelSize: Style.fontSm
+                            }
+                            MonoButton {
+                                visible: Lyrics.remembered + Album.count > 0
+                                text: "forget now"
+                                color: Colors.accent
+                                font.pixelSize: Style.fontSm
+                                onClicked: Lyrics.forget()
+                            }
+                        }
                         Mono {
                             visible: Privacy.active
                             text: "in use: " + Privacy.micApps.concat(Privacy.videoApps).join(", ")
