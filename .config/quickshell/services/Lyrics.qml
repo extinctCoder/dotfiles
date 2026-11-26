@@ -36,7 +36,7 @@ Singleton {
     // say(what the dashboard shows, what the log gets): the log never names the track
     function say(s, log) { status = s; console.log("lyrics: " + (log ?? s)); }
     property string plain: ""          // plain lyrics, when no synced version exists
-    readonly property string source: Media.recognized ? "ear" : "player" // where the names came from
+    readonly property string source: Media.recognized?.by === "ear" ? "ear" : "player" // where the names came from
     readonly property int remembered: Object.keys(cache || {}).filter(k => !cache[k].none).length
 
     // listening by ear on/off: a setting (kept in ~/.local/state), not listening data
@@ -119,7 +119,7 @@ Singleton {
 
     // Players announce a new track in pieces (browsers: title, then artist, then
     // length), so wait until it settles, then look up once with complete info.
-    onKeyChanged: { lines = []; plain = ""; Media.recognized = null; tried = false; missed = false; retried = false; retry.stop(); settle.restart(); }
+    onKeyChanged: { lines = []; plain = ""; waitingShort = false; Media.recognized = null; tried = false; missed = false; retried = false; retry.stop(); settle.restart(); }
     Component.onCompleted: settle.restart() // a song may already be playing (the shell reloads on every wallpaper change)
     Timer {
         id: settle
@@ -132,13 +132,24 @@ Singleton {
         function onActiveChanged() { if (Media.active && root.missed && !root.tried && root.key !== "") root.recognize(); }
     }
 
+    property bool waitingShort: false // a track under 30 s (a video ad?): wait for the real one
+    Connections {
+        target: Media
+        function onLengthChanged() { if (root.waitingShort && Media.length >= 30) { root.waitingShort = false; settle.restart(); } }
+    }
     function start() {
         if (key === "") return;
-        if (fetch.running || recognizer.running) { pending = true; return; }
+        if (fetch.running || recognizer.running || details.running) { pending = true; return; }
+        if (Media.length > 0 && Media.length < 30) { // 0 = unknown: look it up anyway (streams never say)
+            waitingShort = true;
+            say("waiting: " + Math.round(Media.length) + " s is too short for a song (an ad?)");
+            return;
+        }
+        waitingShort = false;
         const known = (cache || {})[key];
         say("looking up");
-        if (known && !known.none) { // recognized before: use the real names right away
-            tried = true;
+        if (known && !known.none) { // known from before: use the real names right away
+            if (known.by === "ear") tried = true;
             Media.recognized = known;
             lookup(known.artist, known.title, known.album, known.artist, known.title);
         } else {
@@ -161,7 +172,8 @@ Singleton {
     // after a lookup or recognition exits: a changed track starts over; else a
     // quick lookup that found nothing goes on to recognition
     function afterRun() {
-        if (pending) { pending = false; wantRecognize = false; settle.restart(); return; }
+        if (pending) { pending = false; wantRecognize = false; wantDetails = false; settle.restart(); return; }
+        if (wantDetails && !fetch.running && !details.running) { wantDetails = false; lookUpDetails(); }
         if (wantRecognize && !fetch.running && !recognizer.running) { wantRecognize = false; recognize(); }
     }
     // Identified songs are written to disk; misses stay in memory only (a sample can
@@ -233,7 +245,53 @@ Singleton {
                 else if (!Media.active) root.say(why + " · will identify it by ear once it plays");
                 else root.say(why + " · identifying it by ear next");
                 root.wantRecognize = found.length === 0 && plain === "" && Media.active;
+                const listensNext = root.wantRecognize && root.byEar && root.hasSongrec && !root.tried;
+                if (Media.recognized === null && !listensNext) root.wantDetails = true;
                 if (!fetch.running) root.afterRun(); // exited before its output was read
+            }
+        }
+    }
+
+    // Album details by name (the quick way): one iTunes Search API request with
+    // the cleaned artist and title (no key; ~20 requests a minute allowed, one per
+    // new song here). Album, year, genre, a 600 px cover and a link. Without a match,
+    // the cleaned names still replace the video's. Remembered like recognitions.
+    property bool wantDetails: false
+    function lookUpDetails() {
+        if (key === "" || Media.recognized !== null) return;
+        fetchingKey = key;
+        details.query = { artist: clean.artist, title: clean.title };
+        details.running = true;
+    }
+    function loose(x) { return (x || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, ""); }
+    Process {
+        id: details
+        property var query: ({ artist: "", title: "" })
+        command: ["curl", "-sfG", "--max-time", "10", "--data-urlencode", "term=" + query.artist + " " + query.title,
+            "--data-urlencode", "entity=song", "--data-urlencode", "limit=10", "https://itunes.apple.com/search"]
+        onExited: root.afterRun()
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const k = root.fetchingKey, q = details.query;
+                let song = { by: "names", artist: q.artist, title: q.title }; // at least the cleaned names
+                try {
+                    const a = root.loose(q.artist), t = root.loose(q.title);
+                    const hits = (JSON.parse(text).results || []).filter(r => {
+                        const ra = root.loose(r.artistName), rt = root.loose(r.trackName);
+                        return (ra === a || ra.includes(a) || a.includes(ra)) && rt.startsWith(t);
+                    });
+                    hits.sort((x, y) => Math.abs(x.trackTimeMillis / 1000 - Media.length) - Math.abs(y.trackTimeMillis / 1000 - Media.length));
+                    const r = hits[0];
+                    if (r) song = {
+                        by: "names", artist: r.artistName, title: r.trackName, album: r.collectionName || "",
+                        year: (r.releaseDate || "").slice(0, 4), genre: r.primaryGenreName || "", label: "",
+                        url: r.trackViewUrl || "",
+                        cover: (r.artworkUrl100 || "").replace("100x100", "600x600") // undocumented size; else stays 100 px
+                    };
+                } catch (e) {}
+                if (k !== root.key) return;
+                root.remember(k, song);
+                Media.recognized = song;
             }
         }
     }
@@ -272,7 +330,7 @@ Singleton {
                             }
                             break;
                         }
-                        song = { artist: t.subtitle || "", title: t.title, album: album, year: year, label: label,
+                        song = { by: "ear", artist: t.subtitle || "", title: t.title, album: album, year: year, label: label,
                             genre: t.genres?.primary || "", url: t.url || "", cover: t.images?.coverart || "" };
                     }
                 } catch (e) { return; }

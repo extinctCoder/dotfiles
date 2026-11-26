@@ -90,7 +90,10 @@ reloads, not a reboot; the last 50), album covers are downloaded to the
 session's runtime folder (also gone at reboot), the log never names a track, and
 the 11 s recording is deleted right after recognition. Quick settings → audio
 has the **listen by ear** switch and **forget now**. LRCLIB still receives the
-names of what plays (that's how lyrics are found). Needs `songrec`
+names of what plays (that's how lyrics are found), and Apple's iTunes Search API
+the cleaned names of songs found the quick way (for the album, year, genre and
+cover; one request per new song). Tracks shorter than 30 s (video ads) are not
+looked up: the shell waits for the real song. Needs `songrec`
 (`media/install.sh`); without it, the quick lookup still works.
 
 ## Rendering and cost

@@ -286,7 +286,10 @@ LazyLoader {
                                 Chip { text: (mediaTab.song?.label || "").toLowerCase() }
                                 Chip { text: Media.player ? Media.player.identity.toLowerCase() : "" }
                                 Chip { text: Lyrics.source === "ear" ? "identified by ear" : ""; strong: true }
-                                Chip { text: mediaTab.song?.url ? "open in shazam ↗" : ""; onClicked: Qt.openUrlExternally(mediaTab.song.url) }
+                                Chip {
+                                    text: !mediaTab.song?.url ? "" : mediaTab.song.url.includes("shazam") ? "open in shazam ↗" : "open in apple music ↗"
+                                    onClicked: Qt.openUrlExternally(mediaTab.song.url)
+                                }
                             }
                             // spectrum (cava), square bars. A fixed height (Layout.preferredHeight):
                             // a layout sizes a Row by its tallest bar, and bars sized from the Row's
