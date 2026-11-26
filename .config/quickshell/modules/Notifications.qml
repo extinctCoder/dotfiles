@@ -39,7 +39,7 @@ PanelWindow {
         id: card
         property int timeout: 5000       // ms; 0 = stays until handled
         property bool alert: false
-        property real left: 1            // 1 → 0 as time runs out
+        property real remaining: 1       // 1 → 0 as time runs out
         default property alias content: body.data
         signal timedOut()
         Layout.fillWidth: true
@@ -47,12 +47,12 @@ PanelWindow {
         color: Colors.raised
         border { width: Style.border; color: card.alert ? Colors.alert : Colors.border }
         HoverHandler { id: cardHover }
-        function restart() { left = 1; }
+        function restart() { remaining = 1; }
         Timer {
             interval: 50
             repeat: true
             running: card.timeout > 0 && !cardHover.hovered && card.visible
-            onTriggered: { card.left -= 50 / card.timeout; if (card.left <= 0) card.timedOut(); }
+            onTriggered: { card.remaining -= 50 / card.timeout; if (card.remaining <= 0) card.timedOut(); }
         }
         ColumnLayout {
             id: body
@@ -62,7 +62,7 @@ PanelWindow {
         Rectangle {
             visible: card.timeout > 0
             anchors { left: parent.left; bottom: parent.bottom }
-            width: parent.width * Math.max(0, card.left)
+            width: parent.width * Math.max(0, card.remaining)
             height: 2
             color: card.alert ? Colors.alert : Colors.accent
         }
