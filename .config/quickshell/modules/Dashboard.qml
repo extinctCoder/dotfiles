@@ -276,14 +276,15 @@ LazyLoader {
                                 elide: Text.ElideRight
                                 text: [mediaTab.song?.album || Media.album, mediaTab.song?.year || ""].filter(x => x).join(" · ")
                             }
-                            Flow { // details: genre, label, where the names came from, a link
+                            Flow { // details: genre, label, where it plays, identified by ear (only then), a link
                                 Layout.fillWidth: true
                                 Layout.topMargin: Style.gap
                                 spacing: Style.gap
                                 visible: Media.present
                                 Chip { text: (mediaTab.song?.genre || "").toLowerCase() }
                                 Chip { text: (mediaTab.song?.label || "").toLowerCase() }
-                                Chip { text: Media.present ? (Lyrics.source === "ear" ? "identified by ear" : "from the player") : ""; strong: Lyrics.source === "ear" }
+                                Chip { text: Media.player ? Media.player.identity.toLowerCase() : "" }
+                                Chip { text: Lyrics.source === "ear" ? "identified by ear" : ""; strong: true }
                                 Chip { text: mediaTab.song?.url ? "open in shazam ↗" : ""; onClicked: Qt.openUrlExternally(mediaTab.song.url) }
                             }
                             // spectrum (cava), square bars
@@ -313,7 +314,7 @@ LazyLoader {
                                     onTapped: point => { Media.player.position = point.position.x / parent.width * Media.length; }
                                 }
                             }
-                            RowLayout { // time, and what is really playing (the player and its own title)
+                            RowLayout { // time; the video's own title when the song was identified under another name
                                 Layout.fillWidth: true
                                 spacing: Style.pad
                                 Small { text: mediaTab.clock(Media.position) }
@@ -321,7 +322,7 @@ LazyLoader {
                                     Layout.fillWidth: true
                                     horizontalAlignment: Text.AlignHCenter
                                     elide: Text.ElideMiddle
-                                    text: Media.player ? Media.player.identity.toLowerCase() + (mediaTab.song ? " · \"" + Media.title + "\"" : "") : ""
+                                    text: mediaTab.song && Media.title !== Media.shownTitle ? "\"" + Media.title + "\"" : ""
                                 }
                                 Small { text: mediaTab.clock(Media.length) }
                             }
