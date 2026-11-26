@@ -12,7 +12,11 @@ Singleton {
     readonly property var list: server.trackedNotifications
     readonly property bool any: server.trackedNotifications.values.length > 0
     property alias dnd: persist.dnd
-    property alias history: persist.history // newest first: { app, summary, body, time, critical }
+    // newest first: { app, summary, body, time, critical }. Kept across shell reloads as
+    // JSON text: PersistentProperties carries plain values only (a list or object
+    // belongs to the old script engine and arrives as undefined).
+    property var history: []
+    onHistoryChanged: if (persist.ready) persist.historyJson = JSON.stringify(history)
     property alias unread: persist.unread
 
     signal notified(string text, bool critical) // the living core is touched by it
@@ -38,8 +42,13 @@ Singleton {
         id: persist
         reloadableId: "notifsState"
         property bool dnd: false
-        property var history: []
+        property string historyJson: "[]"
         property int unread: 0
+        property bool ready: false
+        onLoaded: {
+            try { root.history = JSON.parse(historyJson) || []; } catch (e) { root.history = []; }
+            ready = true;
+        }
     }
 
     NotificationServer {

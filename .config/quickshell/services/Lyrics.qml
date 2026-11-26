@@ -37,7 +37,7 @@ Singleton {
     function say(s, log) { status = s; console.log("lyrics: " + (log ?? s)); }
     property string plain: ""          // plain lyrics, when no synced version exists
     readonly property string source: Media.recognized ? "ear" : "player" // where the names came from
-    readonly property int remembered: Object.keys(cache).filter(k => !cache[k].none).length
+    readonly property int remembered: Object.keys(cache || {}).filter(k => !cache[k].none).length
 
     // listening by ear on/off: a setting (kept in ~/.local/state), not listening data
     property bool byEar: true
@@ -50,7 +50,8 @@ Singleton {
     }
     // forget now: identified songs (memory) and covers (Album)
     function forget() {
-        memory.cache = {};
+        cache = {};
+        memory.cacheJson = "{}";
         Media.recognized = null;
         Album.forget();
         say("forgot identified songs and covers");
@@ -65,11 +66,13 @@ Singleton {
     property bool missed: false        // the quick lookup ran for this track and found nothing
     property bool retried: false       // one more try by ear, 30 s later, after Shazam missed
     property var query: ({ artist: "", title: "", album: "", length: "0", cleanArtist: "", cleanTitle: "" })
-    property alias cache: memory.cache // track key -> { artist, title, album, year, genre, label, url, cover } or { none: true }
-    PersistentProperties { // memory only: survives shell reloads (wallpaper changes), not a reboot
-        id: memory
+    // track key -> { artist, title, album, year, genre, label, url, cover } or { none: true }
+    property var cache: ({})
+    PersistentProperties { // memory only: survives shell reloads (wallpaper changes), not a reboot.
+        id: memory        // JSON text: a list or object would arrive undefined after a reload
         reloadableId: "lyricsMemory"
-        property var cache: ({})
+        property string cacheJson: "{}"
+        onLoaded: { try { root.cache = JSON.parse(cacheJson) || {}; } catch (e) { root.cache = {}; } }
     }
 
     readonly property string script:
@@ -132,7 +135,7 @@ Singleton {
     function start() {
         if (key === "") return;
         if (fetch.running || recognizer.running) { pending = true; return; }
-        const known = cache[key];
+        const known = (cache || {})[key];
         say("looking up");
         if (known && !known.none) { // recognized before: use the real names right away
             tried = true;
@@ -164,12 +167,13 @@ Singleton {
     // Identified songs are written to disk; misses stay in memory only (a sample can
     // be unlucky: silence, an intro, an ad), so they are tried again next session.
     function remember(k, value) {
-        const c = Object.assign({}, cache);
+        const c = Object.assign({}, cache || {});
         delete c[k];
         c[k] = value; // newest last
         const keys = Object.keys(c);
         for (const old of keys.slice(0, Math.max(0, keys.length - 50))) delete c[old]; // the last 50
-        memory.cache = c;
+        cache = c;
+        memory.cacheJson = JSON.stringify(c);
     }
     // after a miss: one more try by ear, 30 s further into the song
     Timer {
