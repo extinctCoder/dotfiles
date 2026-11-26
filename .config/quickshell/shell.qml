@@ -11,7 +11,7 @@ ShellRoot {
     // Singletons start the first time something uses them. These must run even
     // when no window shows them (notification daemon, battery warnings,
     // wallpaper and overlay IPC), so touch them once here.
-    readonly property var alwaysOn: [Notifs, Battery, Wall, Panels, TextSize, Session, BatteryLog]
+    readonly property var alwaysOn: [Notifs, Battery, Wall, Panels, TextSize, Session, BatteryLog, AppIcons]
 
     Wallpaper {}
     Desktop {}

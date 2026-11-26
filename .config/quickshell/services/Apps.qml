@@ -34,6 +34,7 @@ Singleton {
         return search(query).map(a => ({
             kind: "app", title: a.name, sub: a.genericName || a.comment || "app",
             icon: Quickshell.iconPath(a.icon, "application-x-executable"),
+            iconName: a.icon,
             score: score(query, a.name),
             run: () => launch(a)
         }));

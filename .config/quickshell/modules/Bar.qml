@@ -31,10 +31,6 @@ Variants {
         IdleInhibitor { window: bar; enabled: Session.stayAwake }
 
         function appEntry(id) { return id ? DesktopEntries.heuristicLookup(id) : null; }
-        function iconFor(id) {
-            const entry = appEntry(id);
-            return Quickshell.iconPath(entry ? entry.icon : id.toLowerCase(), "application-x-executable");
-        }
         function workspace(id) { return Array.from(Hypr.workspaces.values).find(w => w.id === id) ?? null; }
 
         // the bar's bottom line (an open block covers its part of it)
@@ -195,11 +191,11 @@ Variants {
             Item { implicitWidth: Style.padLg + Style.pad }
 
             // the focused app: its icon, its name, the window title dimmed; one line, cut with …
-            IconImage {
+            AppIcon {
                 visible: Hypr.windowApp !== ""
-                implicitSize: Style.fontMd
+                size: Style.fontMd
                 Layout.alignment: Qt.AlignVCenter
-                source: Hypr.windowApp !== "" ? bar.iconFor(Hypr.windowApp) : ""
+                name: Hypr.windowApp
             }
             Item { implicitWidth: Style.pad; visible: Hypr.windowApp !== "" }
             Mono {
@@ -230,10 +226,11 @@ Variants {
                     implicitHeight: Style.barHeight - Style.border
                     Layout.alignment: Qt.AlignTop
                     Rectangle { anchors.fill: parent; color: trayHover.hovered || trayMenu.active ? Colors.raised : "transparent" }
-                    IconImage {
+                    AppIcon { // apps: single-color when YAMIS knows them, a little dimmer than the system's icons
                         anchors.centerIn: parent
-                        implicitSize: Style.fontMd
-                        source: tray.modelData.icon
+                        size: Style.fontMd
+                        name: tray.modelData.id
+                        fallback: tray.modelData.icon
                         opacity: 0.75
                     }
                     HoverHandler { id: trayHover }

@@ -28,6 +28,7 @@ From `.config/matugen/config.toml`:
 | `lazygit.yml` | `~/.config/lazygit/config.yml` | when lazygit starts |
 | `qt6ct.conf` | `~/.config/qt6ct/colors/matugen.conf` | when Qt apps start |
 | `uosc.conf` | `~/.config/mpv/script-opts/uosc.conf` | when mpv starts |
+| `icon-accent` | `~/.cache/icon-accent` → `~/.local/share/icons/YAMIS-matugen` (hook `icons-recolor`) | GTK apps on restart; the shell live |
 | `pywal-colors.json` | `~/.cache/wal/colors.json` | live in Zen (`pywalfox update`) |
 | `helium-color.json` | `/etc/helium/policies/managed/color.json` | legacy, only if Helium is set up |
 

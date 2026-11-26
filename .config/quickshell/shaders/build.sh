@@ -4,7 +4,7 @@
 set -e
 cd "$(dirname "$0")"
 QSB=$(command -v qsb || echo /usr/lib/qt6/bin/qsb)
-for f in core.vert core.frag membrane.frag; do
+for f in core.vert core.frag membrane.frag tint.frag; do
     "$QSB" --glsl "100es,120,150" -o "$f.qsb" "$f"
 done
 echo "shaders built"

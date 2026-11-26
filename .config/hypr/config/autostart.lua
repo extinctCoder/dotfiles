@@ -1,11 +1,12 @@
 ---@diagnostic disable: undefined-global
 
--- GTK apps follow the desktop: dark adw-gtk3 theme, Papirus icons and no title
+-- GTK apps follow the desktop: dark adw-gtk3 theme, YAMIS (or Papirus) icons, no title
 -- bar buttons (Hyprland manages windows). Fonts: set by the shell's text size.
 local gtk = table.concat({
     "gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3-dark'",
     "gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'",
-    "gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'",
+    -- single-color icons when installed (icons/install.sh), else Papirus
+    "gsettings set org.gnome.desktop.interface icon-theme \"$([ -d ~/.local/share/icons/YAMIS-matugen ] && echo YAMIS-matugen || echo Papirus-Dark)\"",
     "gsettings set org.gnome.desktop.wm.preferences button-layout ':'",
 }, "; ")
 

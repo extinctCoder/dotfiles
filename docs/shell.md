@@ -32,6 +32,8 @@ shaders/       GLSL sources + compiled .qsb for the living core
 | `Sys` | CPU (total + per core + history), memory, swap, network rates + history, temperature, uptime; every 2 s from `/proc` |
 | `Disk` | local drives (`df`, one per device) and disk read/write rates (`/proc/diskstats`) |
 | `Sensors` | Intel GPU busy share (RC6 residency, no root) and NVMe temperature |
+| `Procs` | the busiest processes, sampled only while the dashboard's system tab shows |
+| `AppIcons` | which apps have a single-color YAMIS icon |
 | `Battery` · `BatteryLog` | UPower state and warnings · a 5-minute level history in `~/.local/state/battery-history` |
 | `Power` | power profile and session actions |
 | `Audio` · `Brightness` | default speaker volume/mute · screen brightness |
@@ -41,7 +43,7 @@ shaders/       GLSL sources + compiled .qsb for the living core
 | `Visualizer` | cava's spectrum (20 Hz–20 kHz), bass/mid/high bands, beats |
 | `Notifs` | the notification daemon: popups, history, do-not-disturb, unread count |
 | `Hypr` | workspaces, focused window, focus/move helpers |
-| `Panels` | which overlay is open; most IPC targets |
+| `Panels` | which overlay is open, which quick-settings section is unfolded; most IPC targets |
 | `Keymap` | keybinds and the leader menu, read from `keymap.lua` |
 | `Apps` · `Actions` · `Calc` · `Files` · `Places` · `YouTube` · `Clipboard` | the launcher's sources |
 | `Wall` | wallpaper path, folder, and setting one (runs matugen) |
@@ -52,16 +54,17 @@ shaders/       GLSL sources + compiled .qsb for the living core
 
 | Module | What it is |
 |---|---|
-| `Bar` | workspaces + app icons, the `Island`, `StatusItem`s with `Popup`s |
-| `Island` | the bar's center: notification preview › level › song › window title |
-| `NetPopup` `CpuPopup` `MemPopup` `VolPopup` `BatPopup` `ClockPopup` `PrivacyPopup` | the status popups |
-| `QuickPanel` | quick settings and notification history (`Super + A`) |
-| `Notifications` | live notification stack, top right |
-| `Launcher` | the search box (`Super + Space`, `Super + V`) |
+| `Bar` | one bar, two sides; framed blocks (logo, status, clock, power) open their panels; workspace squares with live hover previews; tray buttons |
+| `TrayMenu` | a tray app's own menu, drawn in the shell's style |
+| `QuickPanel` | quick settings: toggles and foldable sections (`Super + A`, status block) |
+| `Dashboard` | overview, media, system and weather tabs (`Super + I`, clock block) |
+| `Notifications` | the card stack: notifications (inline reply), now playing, levels |
+| `Launcher` | the search box (`Super + Space`, `Super + V`), hanging from the left corner |
 | `Overview` | workspaces with live window previews (`Super + Tab`) |
 | `Cheatsheet` | keybind cheatsheet and leader menu |
-| `PowerMenu` `WallpaperPicker` `Lock` | power menu, wallpaper picker, lock screen |
+| `PowerMenu` `WallpaperPicker` `Lock` | power menu (incl. reboot to UEFI), wallpaper picker, lock screen |
 | `Wallpaper` `Desktop` `LivingCore` `MirrorWave` | the background, the desktop widgets, the creature, a mirrored bar graph |
+| `AppIcon` | an app icon: YAMIS in the exact accent (a tint shader), else the regular icon |
 | `Mono` `MonoButton` `Slider` | small building blocks in the shared style |
 
 ## IPC
@@ -72,7 +75,7 @@ The keybinds talk to the shell with `qs ipc call <target> <function>`:
 |---|---|
 | `launcher` | `toggle`, `clipboard` |
 | `keys` | `cheatsheet`, `leader` |
-| `overview` · `quick` · `power` · `picker` | `toggle` |
+| `overview` · `quick` · `dash` · `power` · `picker` | `toggle` |
 | `lock` | `lock`, `isLocked` |
 | `notifs` | `clear`, `dnd` |
 | `wallpaper` | `set <path>`, `next`, `get` |

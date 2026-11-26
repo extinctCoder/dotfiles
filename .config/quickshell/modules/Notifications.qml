@@ -163,11 +163,18 @@ PanelWindow {
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: Style.pad
-                    IconImage { // the sender's image (a contact's photo), else the app's icon
+                    IconImage { // the sender's image (a contact's photo)
+                        visible: note.modelData.image !== ""
                         Layout.alignment: Qt.AlignTop
-                        implicitSize: note.modelData.image !== "" ? Style.rowHeight * 1.6 : Style.fontLg
-                        source: note.modelData.image !== "" ? note.modelData.image
-                            : Quickshell.iconPath(note.modelData.appIcon || note.modelData.desktopEntry || "dialog-information", "dialog-information")
+                        implicitSize: Style.rowHeight * 1.6
+                        source: note.modelData.image
+                    }
+                    AppIcon { // else the app's icon
+                        visible: note.modelData.image === ""
+                        Layout.alignment: Qt.AlignTop
+                        size: Style.fontLg
+                        name: note.modelData.desktopEntry || note.modelData.appIcon || note.modelData.appName
+                        color: note.critical ? Colors.alert : Colors.accent
                     }
                     ColumnLayout {
                         Layout.fillWidth: true

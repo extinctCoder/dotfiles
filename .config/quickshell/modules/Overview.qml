@@ -141,10 +141,11 @@ LazyLoader {
                                             id: label
                                             anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: Style.gap }
                                             spacing: Style.gap
-                                            IconImage {
+                                            AppIcon {
                                                 anchors.verticalCenter: parent.verticalCenter
-                                                implicitSize: Style.fontMd
-                                                source: win.icon(tile.modelData)
+                                                size: Style.fontMd
+                                                name: win.appId(tile.modelData)
+                                                fallback: win.icon(tile.modelData)
                                             }
                                             Mono {
                                                 width: parent.width - Style.fontMd - Style.gap

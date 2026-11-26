@@ -18,13 +18,16 @@ Built around a few rules:
 | Part | What it is |
 |---|---|
 | **Hyprland** | tiling compositor, configured in Lua; vim-style keys |
-| **Bar** | workspaces with app icons · an *island* (song, volume, notifications, window title) · status items with popups (network, CPU, memory, volume, battery, calendar + weather + world clock) · mic/camera indicators |
-| **Quick settings** (`Super + A`) | Wi-Fi, Bluetooth, night light, silent, stay awake, power mode; volume, brightness and text-size sliders; notification history |
+| **Bar** | one bar, two sides: logo · workspace squares (hover for a live preview) · the focused app │ tray · values that matter right now · status block · clock block · power. Panels hang flush from it |
+| **Quick settings** (`Super + A`, or the status block) | toggles (Wi-Fi, Bluetooth, night light, silent, stay awake, mic) and sections: networks, Bluetooth devices, audio + output, display, battery + power mode, notifications |
+| **Dashboard** (`Super + I`, or the clock block) | overview, media (player, spectrum, lyrics), system, weather (24 hours, 7 days) |
+| **Cards** | notifications (with inline reply), now playing, volume and brightness levels |
 | **Launcher** (`Super + Space`) | apps, actions, calculator, files, Zen bookmarks and history, YouTube, web search, clipboard history |
 | **Window overview** (`Super + Tab`) | live previews of every workspace; type to jump; drag windows between workspaces |
 | **Desktop** | the **living core** (a creature drawn on the GPU from live system data and music), clock, synced lyrics, drives, disk activity, CPU heat, network, sun arc and weather, world timeline, battery curve |
 | **Login and boot** | greetd + a Quickshell login screen; a minimal Plymouth splash with a quiet boot |
 | **Apps** | Ghostty, Zen (live wallpaper colors), mpv with YouTube (uosc controls, SponsorBlock), yazi, btop, lazygit, Neovim colors, GTK and Qt apps |
+| **Icons** | YAMIS single-color app icons in the wallpaper's accent (optional, `icons/install.sh`) |
 
 ## Quick start
 
@@ -52,6 +55,7 @@ Then log in to Hyprland on TTY 1 (`.zprofile` starts it), or set up the login sc
 | `Super + Space` | launcher (`>` actions · `/` files · `@` bookmarks · `=` math · `?` web · `yt ` YouTube) |
 | `Super + Enter` | terminal |
 | `Super + A` | quick settings and notifications |
+| `Super + I` | dashboard |
 | `Super + Tab` | window overview |
 | `Super + W` | wallpaper picker (recolors everything) |
 | `Super + D` | leader menu: one more key runs an action |
@@ -72,11 +76,12 @@ greeter/       login screen (greetd + Quickshell); not stowed, has install.sh
 boot/          Plymouth theme and quiet boot; not stowed, has install.sh
 browser/       Zen setup (zen-install.sh); Helium setup (install.sh, legacy)
 media/         mpv + YouTube setup (install.sh)
+icons/         single-color app icons (install.sh)
 docs/          documentation
 ```
 
 The home-folder parts are linked into place with [GNU Stow](https://www.gnu.org/software/stow/);
-`greeter/`, `boot/`, `browser/` and `media/` are skipped by Stow (`.stow-local-ignore`)
+`greeter/`, `boot/`, `browser/`, `media/` and `icons/` are skipped by Stow (`.stow-local-ignore`)
 and installed by their own scripts.
 
 ## Documentation

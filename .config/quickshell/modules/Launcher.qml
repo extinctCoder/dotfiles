@@ -145,10 +145,13 @@ LazyLoader {
                             Item {
                                 implicitWidth: Style.fontLg
                                 implicitHeight: Style.fontLg
-                                IconImage {
+                                AppIcon {
                                     anchors.fill: parent
                                     visible: row.modelData.icon !== undefined
-                                    source: row.modelData.icon ?? ""
+                                    name: row.modelData.iconName ?? ""
+                                    fallback: row.modelData.icon ?? ""
+                                    size: Style.fontLg
+                                    color: row.selected ? Colors.accentFg : Colors.accent
                                 }
                                 Mono {
                                     anchors.centerIn: parent

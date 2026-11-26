@@ -123,6 +123,18 @@ uosc controls in your colors, SponsorBlock, and ff2mpv. Then install the **ff2mp
 extension in Zen for *right-click → Play in MPV*. In the launcher, `yt <words>`
 searches YouTube and plays the pick in mpv.
 
+### Single-color app icons
+
+```sh
+~/dotfiles/icons/install.sh
+```
+
+Installs YAMIS (Yet Another Monochrome Icon Set, GPL-3.0) and writes a copy in
+your accent, `~/.local/share/icons/YAMIS-matugen`, which matugen rewrites on every
+wallpaper change (about half a second). GTK apps use it; Papirus-Dark stays the
+fallback for icons YAMIS doesn't have. The shell paints YAMIS icons in the live
+accent itself. Apps that are already open pick up new icons when restarted.
+
 ### Helium (legacy)
 
 `browser/install.sh` and the `helium` matugen template come from before Zen. They do

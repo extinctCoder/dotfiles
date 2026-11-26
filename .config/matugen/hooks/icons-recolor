@@ -1,0 +1,26 @@
+#!/bin/sh
+# Writes ~/.local/share/icons/YAMIS-matugen: the YAMIS icon theme in one color.
+#   icons-recolor '#acd28e'     (matugen runs this on every wallpaper change)
+# YAMIS draws with currentColor and sets the color once per file (#d8dee9,
+# a few #fcfcfc), so recoloring is one substitution per file (~0.5 s for all).
+# Does nothing until YAMIS is installed (icons/install.sh).
+set -e
+color=$1
+case "$color" in \#[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]) ;; *) echo "usage: $0 '#rrggbb'" >&2; exit 1 ;; esac
+
+# the installed YAMIS (not our copy): the theme whose index.theme names YAMIS
+src=""
+for d in /usr/share/icons/* "$HOME/.local/share/icons"/*; do
+    [ -f "$d/index.theme" ] || continue
+    case "$(basename "$d")" in YAMIS-matugen) continue ;; esac
+    grep -qi '^Name=.*YAMIS\|^Name=.*yet another monochrome' "$d/index.theme" && { src=$d; break; }
+done
+[ -n "$src" ] || exit 0
+
+dst="$HOME/.local/share/icons/YAMIS-matugen"
+mkdir -p "$(dirname "$dst")"
+rm -rf "$dst.new"
+cp -a "$src" "$dst.new"
+find "$dst.new" -type f -name '*.svg' -exec sed -i -e "s/#d8dee9/$color/gI" -e "s/#fcfcfc/$color/gI" {} +
+sed -i -e 's/^Name=.*/Name=YAMIS matugen/' -e 's/^Inherits=.*/Inherits=Papirus-Dark,breeze-dark,Adwaita,hicolor/' "$dst.new/index.theme"
+rm -rf "$dst" && mv "$dst.new" "$dst"
